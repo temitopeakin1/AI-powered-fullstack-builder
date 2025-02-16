@@ -1,0 +1,54 @@
+.wrapper {
+  position: relative;
+  width: 41px;
+  height: 41px;
+}
+
+.square {
+  position: absolute;
+
+  width: 100%;
+  height: 100%;
+
+}
+
+.square-top {
+  top: 0;
+  left: 0;
+  animation: spinRight 4s linear infinite;
+}
+
+.square-bottom {
+  top: 16%; /* Move to the vertical center */
+  left: 14%;
+  width: 30px;
+  height: 30px;
+  position: absolute;
+  animation: spinLeft 4s linear infinite;
+
+}
+
+@keyframes spinRight {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes spinLeft {
+  from {
+    transform: rotate(360deg);
+  }
+  to {
+    transform: rotate(0deg);
+  }
+}
+
+.hexagon {
+  top: 30%;
+  left: 30%;
+  width: 25px;
+  height: 25px;
+}

@@ -1,0 +1,125 @@
+.switch {
+  position: relative;
+  display: inline-block;
+  width: 60px;
+  height: 34px;
+}
+
+.switch input {
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+.slider {
+  position: absolute;
+  cursor: pointer;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  width: 48px;
+  padding: 4px;
+  border-radius: 9999px;
+  border: 1px solid #2E2E2E;
+  background: linear-gradient(180deg, #010101 0%, #141414 100%);
+  -webkit-transition: .4s;
+  transition: .4s;
+}
+
+.slider:before {
+  position: absolute;
+  content: "";
+  width: 20px;
+  height: 20px;
+  left: 3px;
+  bottom: 6px;
+  background-color: #2E2E2E;
+  -webkit-transition: .4s;
+  transition: .4s;
+}
+
+//   input:checked + .slider {
+//     background-color: #86F49C;
+//   }
+
+//   input:focus + .slider {
+//     box-shadow: 0 0 1px #86F49C;
+//   }
+
+input:checked + .slider:before {
+  -webkit-transform: translateX(20px);
+  -ms-transform: translateX(20px);
+  transform: translateX(20px);
+  background-color: #86F49C;
+}
+
+/* Rounded sliders */
+.slider.round {
+  border-radius: 34px;
+}
+
+.slider.round:before {
+  border-radius: 50%;
+}
+
+
+.custom-file-input::-webkit-file-upload-button {
+  visibility: hidden;
+}
+
+.custom-file-input::before {
+  content: 'Select some files';
+  display: inline-block;
+  background: linear-gradient(top, #f9f9f9, #e3e3e3);
+  border: 1px solid #999;
+  border-radius: 3px;
+  padding: 5px 8px;
+  outline: none;
+  white-space: nowrap;
+  -webkit-user-select: none;
+  cursor: pointer;
+  text-shadow: 1px 1px #fff;
+  font-weight: 700;
+  font-size: 10pt;
+}
+
+.custom-file-input:hover::before {
+  border-color: black;
+}
+
+.custom-file-input:active::before {
+  background: -webkit-linear-gradient(top, #e3e3e3, #f9f9f9);
+}
+
+
+.container {
+  display: flex;
+  align-items: center;
+  margin-top: 20px,
+}
+
+.label {
+  display: flex;
+  align-items: center;
+  cursor: pointer;
+  width: 100%;
+  padding: 10px 20px;
+  border: 1px solid #2E2E2E;
+  border-radius: 500px;
+  background: linear-gradient(180deg, #010101 57.32%, #161616 100%);
+}
+
+.icon {
+  margin-right: 10px;
+  font-size: 20px
+}
+
+.text {
+  font-size: 16px;
+  color: #777;
+}
+
+.input {
+  display: none
+}

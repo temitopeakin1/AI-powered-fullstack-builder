@@ -1,0 +1,40 @@
+@font-face {
+  font-family: 'Rexton';
+  src: url('/fonts/RextonRegularRegular.woff2') format('woff2'),
+  url('/fonts/RextonRegularRegular.woff2') format('woff');
+  font-weight: 500;
+}
+
+.custom {
+  font-family: 'Rexton', serif;
+  letter-spacing: -0.2em;
+}
+
+.meteor-img{
+  fill: linear-gradient(71deg, #FFF 2.24%, #EFEFEF 4.72%, #BDBDBD 13.4%, #909090 23.31%, #696969 33.23%, #484848 44.39%, #2E2E2E 55.54%, #191919 67.94%, #0B0B0B 82.81%, #020202 98.93%, #000 126.2%);
+  background-blend-mode: screen;
+  mix-blend-mode: screen;
+}
+
+.error-msg{
+  color: #F5F5F5;
+  text-align: center;
+  font-family: Poppins;
+  font-size: clamp(18px, 2vw, 20px);
+  font-style: normal;
+  font-weight: 400;
+  line-height: clamp(30px, 4vw, 34px);  
+}
+
+.error-no{
+  color: #83F2A1;
+  text-align: center;
+  font-family: "Rexton Regular";
+  font-size: 100px;
+  font-style: normal;
+  font-weight: 500;
+  line-height: 60px; 
+  letter-spacing: -12px;
+}
+
+

@@ -1,0 +1,29 @@
+.actions .shiki {
+  background-color: var(--biela-elements-actions-code-background) !important;
+  padding: 8px;
+  font-family: "Fira Code", 'sans-serif';
+  font-weight: 300;
+  font-size: 12px;
+}
+
+.shiki .line {
+  span {
+    &:nth-of-type(2) {
+      color: #42E3FF !important;
+    }
+
+    &:nth-of-type(3) {
+      color: #42E3FF !important;
+    }
+
+    &:first-of-type {
+      color: #FFE873 !important;
+    }
+  }
+}
+
+.shiki {
+  &:not(:has(.actions), .actions *) {
+    background-color: var(--biela-elements-messages-code-background) !important;
+  }
+}

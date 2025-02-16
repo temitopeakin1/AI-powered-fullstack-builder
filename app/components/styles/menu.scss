@@ -1,0 +1,41 @@
+.border-top-green {
+
+  background: linear-gradient(to right, rgb(37, 35, 35), rgb(37, 35, 35), rgb(37, 35, 35), #86F49C, rgb(37, 35, 35), rgb(37, 35, 35), rgb(37, 35, 35));
+}
+
+// .border-container{
+//     top: 0; display: none;
+//     z-index: 1;
+// }
+
+// .history-item:hover .border-container{
+//     display: block;
+//     ;
+// }
+.history-item {
+  border: 1px solid transparent;
+}
+
+.search-input-bg {
+  background: linear-gradient(180deg, #010101 57.32%, #161616 100%);
+
+}
+
+.history-item-lable {
+  background: linear-gradient(90deg, #A598FE 0%, #63D9D7 8.65%, #84F2A0 16.48%);
+  background-clip: text;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.history-item:hover {
+  border: 1px solid rgb(37, 35, 35);
+}
+
+.bg-liner-gradient {
+  background-image: linear-gradient(0deg, rgba(0, 0, 0, 0.05) 0%, rgba(31, 31, 31, 0.80) 100%)
+}
+
+// html[data-theme="light"] .bg-liner-gradient{
+//     background-image: white
+//    }

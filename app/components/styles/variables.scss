@@ -1,0 +1,251 @@
+/* Color Tokens Light Theme */
+:root,
+:root[data-theme='light'] {
+  --biela-elements-borderColor: theme('colors.alpha.gray.10');
+  --biela-elements-borderColorActive: theme('colors.accent.600');
+
+  --biela-elements-bg-depth-1: theme('colors.white');
+  --biela-elements-bg-depth-2: theme('colors.gray.50');
+  --biela-elements-bg-depth-3: theme('colors.gray.200');
+  --biela-elements-bg-depth-4: theme('colors.alpha.gray.5');
+
+  --biela-elements-textPrimary: theme('colors.gray.950');
+  --biela-elements-textSecondary: theme('colors.gray.600');
+  --biela-elements-textTertiary: theme('colors.gray.500');
+
+  --biela-elements-code-background: theme('colors.gray.100');
+  --biela-elements-code-text: theme('colors.gray.950');
+
+  --biela-elements-button-primary-background: theme('colors.alpha.accent.10');
+  --biela-elements-button-primary-backgroundHover: theme('colors.alpha.accent.20');
+  --biela-elements-button-primary-text: theme('colors.accent.500');
+
+  --biela-elements-button-secondary-background: theme('colors.alpha.gray.5');
+  --biela-elements-button-secondary-backgroundHover: theme('colors.alpha.gray.10');
+  --biela-elements-button-secondary-text: theme('colors.gray.950');
+
+  --biela-elements-button-danger-background: theme('colors.alpha.red.10');
+  --biela-elements-button-danger-backgroundHover: theme('colors.alpha.red.20');
+  --biela-elements-button-danger-text: theme('colors.red.500');
+
+  --biela-elements-item-contentDefault: theme('colors.alpha.gray.50');
+  --biela-elements-item-contentActive: theme('colors.gray.950');
+  --biela-elements-item-contentAccent: theme('colors.accent.700');
+  --biela-elements-item-contentDanger: theme('colors.red.500');
+  --biela-elements-item-backgroundDefault: rgba(0, 0, 0, 0);
+  --biela-elements-item-backgroundActive: theme('colors.alpha.gray.5');
+  --biela-elements-item-backgroundAccent: theme('colors.alpha.accent.10');
+  --biela-elements-item-backgroundDanger: theme('colors.alpha.red.10');
+
+  --biela-elements-loader-background: theme('colors.alpha.gray.10');
+  --biela-elements-loader-progress: theme('colors.accent.500');
+
+  --biela-elements-artifacts-background: theme('colors.white');
+  --biela-elements-artifacts-backgroundHover: theme('colors.alpha.gray.2');
+  --biela-elements-artifacts-borderColor: var(--biela-elements-borderColor);
+  --biela-elements-artifacts-inlineCode-background: theme('colors.gray.100');
+  --biela-elements-artifacts-inlineCode-text: var(--biela-elements-textPrimary);
+
+  --biela-elements-actions-background: theme('colors.white');
+  --biela-elements-actions-code-background: theme('colors.gray.800');
+
+  --biela-elements-messages-background: theme('colors.gray.100');
+  --biela-elements-messages-linkColor: theme('colors.accent.500');
+  --biela-elements-messages-code-background: theme('colors.gray.800');
+  --biela-elements-messages-inlineCode-background: theme('colors.gray.200');
+  --biela-elements-messages-inlineCode-text: theme('colors.gray.800');
+
+  --biela-elements-icon-success: theme('colors.green.500');
+  --biela-elements-icon-error: theme('colors.red.500');
+  --biela-elements-icon-primary: theme('colors.gray.950');
+  --biela-elements-icon-secondary: theme('colors.gray.600');
+  --biela-elements-icon-tertiary: theme('colors.gray.500');
+
+  --biela-elements-dividerColor: theme('colors.gray.100');
+
+  --biela-elements-prompt-background: theme('colors.alpha.white.80');
+
+  --biela-elements-sidebar-dropdownShadow: theme('colors.alpha.gray.10');
+  --biela-elements-sidebar-buttonBackgroundDefault: theme('colors.alpha.accent.10');
+  --biela-elements-sidebar-buttonBackgroundHover: theme('colors.alpha.accent.20');
+  --biela-elements-sidebar-buttonText: theme('colors.accent.700');
+
+  --biela-elements-preview-addressBar-background: theme('colors.gray.100');
+  --biela-elements-preview-addressBar-backgroundHover: theme('colors.alpha.gray.5');
+  --biela-elements-preview-addressBar-backgroundActive: theme('colors.white');
+  --biela-elements-preview-addressBar-text: var(--biela-elements-textSecondary);
+  --biela-elements-preview-addressBar-textActive: var(--biela-elements-textPrimary);
+
+  --biela-elements-terminals-background: theme('colors.white');
+  --biela-elements-terminals-buttonBackground: var(--biela-elements-bg-depth-4);
+
+  --biela-elements-cta-background: theme('colors.gray.100');
+  --biela-elements-cta-text: theme('colors.gray.950');
+
+  /* Terminal Colors */
+  --biela-terminal-background: var(--biela-elements-terminals-background);
+  --biela-terminal-foreground: #333333;
+  --biela-terminal-selection-background: #00000040;
+  --biela-terminal-black: #000000;
+  --biela-terminal-red: #cd3131;
+  --biela-terminal-green: #00bc00;
+  --biela-terminal-yellow: #949800;
+  --biela-terminal-blue: #0451a5;
+  --biela-terminal-magenta: #bc05bc;
+  --biela-terminal-cyan: #0598bc;
+  --biela-terminal-white: #555555;
+  --biela-terminal-brightBlack: #686868;
+  --biela-terminal-brightRed: #cd3131;
+  --biela-terminal-brightGreen: #00bc00;
+  --biela-terminal-brightYellow: #949800;
+  --biela-terminal-brightBlue: #0451a5;
+  --biela-terminal-brightMagenta: #bc05bc;
+  --biela-terminal-brightCyan: #0598bc;
+  --biela-terminal-brightWhite: #a5a5a5;
+}
+
+/* Color Tokens Dark Theme */
+:root,
+:root[data-theme='dark'] {
+  --biela-elements-borderColor: theme('colors.alpha.white.10');
+  --biela-elements-borderColorActive: theme('colors.accent.500');
+
+  --biela-elements-bg-depth-1: theme('colors.gray.950');
+  --biela-elements-bg-depth-2: theme('colors.gray.900');
+  --biela-elements-bg-depth-3: theme('colors.gray.800');
+  --biela-elements-bg-depth-4: theme('colors.alpha.white.5');
+
+  --biela-elements-textPrimary: theme('colors.white');
+  --biela-elements-textSecondary: theme('colors.gray.400');
+  --biela-elements-textTertiary: theme('colors.gray.500');
+
+  --biela-elements-code-background: theme('colors.gray.800');
+  --biela-elements-code-text: theme('colors.white');
+
+  --biela-elements-button-primary-background: theme('colors.alpha.accent.10');
+  --biela-elements-button-primary-backgroundHover: theme('colors.alpha.accent.20');
+  --biela-elements-button-primary-text: theme('colors.accent.500');
+
+  --biela-elements-button-secondary-background: theme('colors.alpha.white.5');
+  --biela-elements-button-secondary-backgroundHover: theme('colors.alpha.white.10');
+  --biela-elements-button-secondary-text: theme('colors.white');
+
+  --biela-elements-button-danger-background: theme('colors.alpha.red.10');
+  --biela-elements-button-danger-backgroundHover: theme('colors.alpha.red.20');
+  --biela-elements-button-danger-text: theme('colors.red.500');
+
+  --biela-elements-item-contentDefault: theme('colors.alpha.white.50');
+  --biela-elements-item-contentActive: theme('colors.white');
+  --biela-elements-item-contentAccent: theme('colors.accent.500');
+  --biela-elements-item-contentDanger: theme('colors.red.500');
+  --biela-elements-item-backgroundDefault: rgba(255, 255, 255, 0);
+  --biela-elements-item-backgroundActive: theme('colors.alpha.white.10');
+  --biela-elements-item-backgroundAccent: theme('colors.alpha.accent.10');
+  --biela-elements-item-backgroundDanger: theme('colors.alpha.red.10');
+
+  --biela-elements-loader-background: theme('colors.alpha.gray.10');
+  --biela-elements-loader-progress: theme('colors.accent.500');
+
+  --biela-elements-artifacts-background: theme('colors.gray.900');
+  --biela-elements-artifacts-backgroundHover: theme('colors.alpha.white.5');
+  --biela-elements-artifacts-borderColor: var(--biela-elements-borderColor);
+  --biela-elements-artifacts-inlineCode-background: theme('colors.gray.800');
+  --biela-elements-artifacts-inlineCode-text: theme('colors.white');
+
+  --biela-elements-actions-background: theme('colors.gray.900');
+  --biela-elements-actions-code-background: theme('colors.gray.800');
+
+  --biela-elements-messages-background: theme('colors.gray.800');
+  --biela-elements-messages-linkColor: theme('colors.accent.500');
+  --biela-elements-messages-code-background: theme('colors.gray.900');
+  --biela-elements-messages-inlineCode-background: theme('colors.gray.700');
+  --biela-elements-messages-inlineCode-text: var(--biela-elements-textPrimary);
+
+  --biela-elements-icon-success: theme('colors.green.400');
+  --biela-elements-icon-error: theme('colors.red.400');
+  --biela-elements-icon-primary: theme('colors.gray.950');
+  --biela-elements-icon-secondary: theme('colors.gray.600');
+  --biela-elements-icon-tertiary: theme('colors.gray.500');
+
+  --biela-elements-dividerColor: theme('colors.gray.100');
+
+  --biela-elements-prompt-background: theme('colors.alpha.gray.80');
+
+  --biela-elements-sidebar-dropdownShadow: theme('colors.alpha.gray.30');
+  --biela-elements-sidebar-buttonBackgroundDefault: theme('colors.alpha.accent.10');
+  --biela-elements-sidebar-buttonBackgroundHover: theme('colors.alpha.accent.20');
+  --biela-elements-sidebar-buttonText: theme('colors.accent.500');
+
+  --biela-elements-preview-addressBar-background: var(--biela-elements-bg-depth-1);
+  --biela-elements-preview-addressBar-backgroundHover: theme('colors.alpha.white.5');
+  --biela-elements-preview-addressBar-backgroundActive: var(--biela-elements-bg-depth-1);
+  --biela-elements-preview-addressBar-text: var(--biela-elements-textSecondary);
+  --biela-elements-preview-addressBar-textActive: var(--biela-elements-textPrimary);
+
+  --biela-elements-terminals-background: var(--biela-elements-bg-depth-1);
+  --biela-elements-terminals-buttonBackground: var(--biela-elements-bg-depth-3);
+
+  --biela-elements-cta-background: theme('colors.alpha.white.10');
+  --biela-elements-cta-text: theme('colors.white');
+
+  /* Terminal Colors */
+  --biela-terminal-background: var(--biela-elements-terminals-background);
+  --biela-terminal-foreground: #eff0eb;
+  --biela-terminal-selection-background: #97979b33;
+  --biela-terminal-black: #000000;
+  --biela-terminal-red: #ff5c57;
+  --biela-terminal-green: #5af78e;
+  --biela-terminal-yellow: #f3f99d;
+  --biela-terminal-blue: #57c7ff;
+  --biela-terminal-magenta: #ff6ac1;
+  --biela-terminal-cyan: #9aedfe;
+  --biela-terminal-white: #f1f1f0;
+  --biela-terminal-brightBlack: #686868;
+  --biela-terminal-brightRed: #ff5c57;
+  --biela-terminal-brightGreen: #5af78e;
+  --biela-terminal-brightYellow: #f3f99d;
+  --biela-terminal-brightBlue: #57c7ff;
+  --biela-terminal-brightMagenta: #ff6ac1;
+  --biela-terminal-brightCyan: #9aedfe;
+  --biela-terminal-brightWhite: #f1f1f0;
+}
+
+/*
+ * Element Tokens
+ *
+ * Hierarchy: Element Token -> (Element Token | Color Tokens) -> Primitives
+ */
+:root {
+  --header-height: 90px;
+  --chat-max-width: 43rem;
+  --chat-min-width: 500px;
+  --workbench-width: min(calc(100% - var(--chat-min-width)), 1536px);
+  --workbench-inner-width: var(--workbench-width);
+  --workbench-left: calc(100% - var(--workbench-width));
+
+  /* Toasts */
+  --toastify-color-progress-success: var(--biela-elements-icon-success);
+  --toastify-color-progress-error: var(--biela-elements-icon-error);
+
+  /* Terminal */
+  --biela-elements-terminal-backgroundColor: var(--biela-terminal-background);
+  --biela-elements-terminal-textColor: var(--biela-terminal-foreground);
+  --biela-elements-terminal-cursorColor: var(--biela-terminal-foreground);
+  --biela-elements-terminal-selection-backgroundColor: var(--biela-terminal-selection-background);
+  --biela-elements-terminal-color-black: var(--biela-terminal-black);
+  --biela-elements-terminal-color-red: var(--biela-terminal-red);
+  --biela-elements-terminal-color-green: var(--biela-terminal-green);
+  --biela-elements-terminal-color-yellow: var(--biela-terminal-yellow);
+  --biela-elements-terminal-color-blue: var(--biela-terminal-blue);
+  --biela-elements-terminal-color-magenta: var(--biela-terminal-magenta);
+  --biela-elements-terminal-color-cyan: var(--biela-terminal-cyan);
+  --biela-elements-terminal-color-white: var(--biela-terminal-white);
+  --biela-elements-terminal-color-brightBlack: var(--biela-terminal-brightBlack);
+  --biela-elements-terminal-color-brightRed: var(--biela-terminal-brightRed);
+  --biela-elements-terminal-color-brightGreen: var(--biela-terminal-brightGreen);
+  --biela-elements-terminal-color-brightYellow: var(--biela-terminal-brightYellow);
+  --biela-elements-terminal-color-brightBlue: var(--biela-terminal-brightBlue);
+  --biela-elements-terminal-color-brightMagenta: var(--biela-terminal-brightMagenta);
+  --biela-elements-terminal-color-brightCyan: var(--biela-terminal-brightCyan);
+  --biela-elements-terminal-color-brightWhite: var(--biela-terminal-brightWhite);
+}

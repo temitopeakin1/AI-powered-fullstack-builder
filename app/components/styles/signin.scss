@@ -1,0 +1,310 @@
+.signin-bg {
+  background-repeat: no-repeat;
+  background-size: cover;
+  font-family: "Rexton Regular", sans-serif;
+  background-image: url(/app/assets/icons/login-bg.png);
+  background-position: center;
+  padding: 0 20px;
+
+  .return-btn {
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+    align-items: center;
+    max-width: 174px;
+    margin: auto;
+  }
+
+  .input-error {
+    border-color: red !important;
+    color: red;
+  }
+
+  .input-container {
+    position: relative;
+    width: 100%;
+
+    &::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      border-radius: 8px;
+      padding: 1px; /* Border thickness */
+      background: linear-gradient(to bottom, #495061, #2d2e2e); /* Vertical gradient */
+      -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+      mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+      -webkit-mask-composite: xor;
+      mask-composite: exclude;
+      z-index: 0;
+      pointer-events: none;
+    }
+  }
+
+  .input-label {
+    position: absolute;
+    top: 12px;
+    left: 12px;
+    color: #fff;
+    font-family: 'Inter', sans-serif;
+    font-size: 12px;
+    font-style: normal;
+    font-weight: 400;
+    line-height: normal;
+    pointer-events: none;
+    transition: all 0.2s ease;
+
+    span {
+      color: red;
+    }
+  }
+
+  .login-new-input {
+    border: 1px solid transparent;
+    border-radius: 8px;
+    background: linear-gradient(0deg, rgba(0, 0, 0, 0.05) 0%, rgba(31, 31, 31, 0.80) 100%);
+    color: #FFF;
+    font-family: 'Inter', sans-serif;
+    font-size: 16px;
+    font-style: normal;
+    font-weight: 300;
+    line-height: 32px;
+    padding: 22px 12px 12px 12px;
+    outline: unset;
+    height: 73px;
+    width: 100%;
+  }
+
+  .login-new-input:-webkit-autofill {
+    background: linear-gradient(0deg, rgba(0, 0, 0, 0.05), rgba(31, 31, 31, 0.80)) !important; /* Force your gradient background */
+    -webkit-box-shadow: 0 0 0px 1000px rgba(0, 0, 0, 0.05) inset !important; /* Prevent white background from autofill */
+    -webkit-text-fill-color: #FFF !important; /* Keep text white */
+    font-size: 16px;
+  }
+
+  .login-new-input::placeholder {
+    color: #BBB;
+    font-family: 'Inter', sans-serif;
+    font-size: 16px;
+    font-style: normal;
+    font-weight: 300;
+    line-height: 32px;
+    position: relative;
+    top: 3px;
+  }
+
+  .login-new-input:focus::placeholder,
+  .login-new-input:not(:placeholder-shown)::placeholder {
+    color: transparent;
+  }
+
+  .input-container:focus-within .input-label,
+  .login-new-input:not(:placeholder-shown) ~ .input-label {
+    color: #BBB; /* Label turns grey */
+  }
+
+  .login-new-input:focus {
+    color: #FFF;
+  }
+
+  .reset-pass {
+    color: #F5F5F5;
+    text-align: center;
+    font-family: var(--typography-typeface-change-font-here-heading, Poppins);
+    font-size: 20px;
+    font-style: normal;
+    font-weight: 400;
+    line-height: var(--Typography-Height-MD, 34px); /* 170% */
+  }
+
+  .error-signin {
+    color: red;
+    margin-top: 8px;
+    font-family: 'Inter', 'sans-serif';
+  }
+
+  .success-signin {
+    color: green;
+    margin-top: 8px;
+    font-family: 'Inter', 'sans-serif';
+  }
+
+  .code-input {
+    border-radius: 8px;
+    border: 1px solid rgba(255, 255, 255, 0.19);
+    background: linear-gradient(0deg, rgba(0, 0, 0, 0.05) 0%, rgba(31, 31, 31, 0.80) 100%);
+    backdrop-filter: blur(25px);
+  }
+
+  input {
+    color: #FFF;
+    font-family: 'Inter', 'sans-serif';
+    font-size: 16px;
+    font-style: normal;
+    font-weight: 300;
+    line-height: 32px;
+    z-index: 10;
+  }
+
+  .title-login {
+    color: #FFF;
+    font-family: "Rexton Regular", sans-serif;
+    font-size: 20px;
+    font-style: normal;
+    font-weight: 500;
+    line-height: 32px;
+    letter-spacing: -0.6px;
+  }
+
+  .desc-login {
+    color: #BBB;
+    font-family: 'Inter', sans-serif;
+    font-size: 12px;
+    font-style: normal;
+    font-weight: 300;
+    line-height: normal;
+    padding: 8px 0 24px;
+  }
+
+  .form-border {
+    border-radius: 8px;
+    border: 1px solid #2E2E2E;
+    background: linear-gradient(0deg, rgba(0, 0, 0, 0.05) 0%, rgba(31, 31, 31, 0.80) 100%);
+    backdrop-filter: blur(25px);
+    width: 100%;
+    max-width: 488px;
+  }
+
+  .login-green-btn {
+    border-radius: 500px;
+    border: 1px solid #B0FFC0;
+    background: #86F49C;
+    box-shadow: 0 0 4px 0 #86F49C;
+    color: #010101;
+    font-family: 'Inter', 'sans-serif';
+    font-size: 14px;
+    padding: 12px 24px;
+    font-style: normal;
+    font-weight: 300;
+    line-height: normal;
+    width: 100%;
+    margin-top: 12px;
+  }
+
+  .forgot-pass {
+    color: #FFF;
+    font-family: 'Inter', 'sans-serif';
+    font-size: 14px;
+    font-style: normal;
+    font-weight: 300;
+    line-height: normal;
+    text-decoration-line: underline;
+    text-decoration-style: solid;
+    text-decoration-skip-ink: auto;
+    text-decoration-thickness: auto;
+    text-underline-offset: auto;
+    text-underline-position: from-font;
+  }
+
+  .copyright-teachme {
+    display: flex;
+    flex-direction: row;
+  }
+
+  .or-section {
+    display: flex;
+    gap: 19px;
+    align-items: center;
+    padding: 12px 0;
+
+    .gradient-grey-left {
+      width: 193px;
+      height: 1px;
+      background: linear-gradient(270deg, rgba(255, 255, 255, 0.20) 0%, rgba(0, 0, 0, 0.00) 103.37%);
+    }
+
+    .gradient-grey-right {
+      width: 193px;
+      height: 1px;
+      background: linear-gradient(90deg, rgba(255, 255, 255, 0.20) 0%, rgba(0, 0, 0, 0.00) 100%);
+    }
+
+    span {
+      color: #777;
+      text-align: center;
+      font-family: 'Inter', sans-serif;
+      font-size: 12px;
+      font-style: normal;
+      font-weight: 300;
+      line-height: normal;
+    }
+  }
+
+  .create-account {
+    margin: auto;
+    color: #86F49C;
+    cursor: pointer;
+    font-family: 'Inter', 'sans-serif';
+    font-size: 14px;
+    font-style: normal;
+    font-weight: 300;
+    line-height: normal;
+    text-decoration-line: underline;
+    display: flex;
+    justify-content: center;
+    text-underline-position: from-font;
+  }
+
+  .flex-btn-login {
+    display: flex;
+    gap: 24px;
+
+    button {
+      color: #010101;
+      font-family: 'Inter', sans-serif;
+      font-size: 14px;
+      font-style: normal;
+      font-weight: 400;
+      line-height: normal;
+      border-radius: 500px;
+    }
+
+    .google-login {
+      background: #FFF;
+      box-shadow: 0 0 4px 0 #FFBC00;
+      padding: 12px 24px;
+    }
+
+    .git-login {
+      color: #FFF;
+      padding: 12px 24px;
+      border: 1px solid rgba(255, 255, 255, 0.10);
+      background: #096BDE;
+      box-shadow: 0 0 4px 0 #0B7BFF;
+    }
+  }
+
+  @media(max-width: 991px) {
+    .success-pass {
+      font-size: 30px !important;
+      line-height: 46px !important;
+    }
+  }
+  @media (max-width: 600px) {
+    .form-border {
+      padding: 15px;
+    }
+    .flex-btn-login {
+      flex-direction: column;
+    }
+  }
+}
+
+
+
+
+
+
+
