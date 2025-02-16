@@ -25,3 +25,4 @@
 - ALWAYS start working from the DEV branch
 - each task should respect the next convention: `${taskType}/${taskId}_${description}, where taskType can be 'feature/bug/fix/etc', taskId is the task id from JIRA (e.g. AI-130); e.g. 'feature/AI-130_google_auth'
 - after the task is ready, you should open a PR from your branch, to the DEV branch, and ask the team to review it
+
