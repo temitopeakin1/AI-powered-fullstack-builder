@@ -375,7 +375,8 @@ export const ChatImpl = memo(
     }, [messages.length]);
 
     useEffect(() => {
-      const prompt = searchParams.get('prompt');
+      // Changed this from 'prompt' to 'chat-prompt' because google oauth returned a 'prompt' query and it would open up the chat, sending gibberish to the llm
+      const prompt = searchParams.get('chat-prompt');
 
       if (!prompt) {
         return;
