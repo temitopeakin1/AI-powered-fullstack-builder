@@ -4,6 +4,8 @@ import '../components/styles/signin.scss';
 import { NavLink, useNavigate, useSearchParams } from '@remix-run/react';
 import { confirmPassword } from '~/ai/lib/stores/user/user';
 import CopyRighting from '~/components/common/copyRight';
+import InfoIcon from '~/assets/icons/infoIcon.svg';
+
 
 interface FormData {
   password: string;
@@ -123,8 +125,18 @@ export default function ConfirmPassword() {
             </button>
 
             {/* Display error or success messages here */}
-            {error && <p className={'error-signin'}>{error}</p>}
-            {success && <p className={'success-signin'}>{success}</p>}
+            {error && (
+              <div className="flex items-start rounded-lg p-3 bg-[rgba(134,244,156,0.07)]">
+                <img src={InfoIcon} alt="Information icon" className="mr-[12px]" />
+                <p className="error-signin !mt-0 !text-[13px] font-light leading-[15px]">{error}</p>
+              </div>
+            )}
+            {success && (
+              <div className="flex items-start rounded-lg p-3 bg-[rgba(134,244,156,0.07)]">
+                <img src={InfoIcon} alt="Information icon" className="mr-[12px]" />
+                <p className="success-signin !mt-0 !text-white !text-[13px] font-light leading-[15px]">{success}</p>
+              </div>
+            )}
           </form>
         </div>
       </section>
