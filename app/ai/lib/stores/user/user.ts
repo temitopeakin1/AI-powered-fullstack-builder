@@ -141,7 +141,7 @@ export async function handleGoogleLogin(code: string){
 
 export async function handleGoogleAuth(state: string){
   const scope = 'email'
-  const authUrl = `https://accounts.google.com/o/oauth2/v2/auth?scope=${encodeURIComponent(scope)}&access_type=online&include_granted_scopes=true&response_type=code&state=${state}&redirect_uri=${import.meta.env.CUSTOM_GOOGLE_REDIRECT_URL}&client_id=${import.meta.env.CUSTOM_GOOGLE_CLIENT_ID}`;
+  const authUrl = `https://accounts.google.com/o/oauth2/v2/auth?scope=${encodeURIComponent(scope)}&access_type=online&include_granted_scopes=true&response_type=code&state=${state}&redirect_uri=${import.meta.env.CUSTOM_BASE_URL}&client_id=${import.meta.env.CUSTOM_GOOGLE_CLIENT_ID}`;
   window.location.href = authUrl;
 }
 
