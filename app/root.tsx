@@ -97,7 +97,7 @@ export const Head = createHead(() => (
  */
 
 function AppContent() {
-  const { githubLogin, isLoggedIn, authenticateToken, getNewUserDataIfExpired } = useUser();
+  const { githubLogin, googleLogin, isLoggedIn, authenticateToken, getNewUserDataIfExpired } = useUser();
 
   useEffect(() => {
     //@ts-ignore This function is loaded in the head script, therefore is not visible for Typescript, but it is called once the page loads.
@@ -118,16 +118,25 @@ function AppContent() {
       const params = new URLSearchParams(location.search);
       const referral = params.get('referral');
       const code = params.get('code');
+      const state = params.get('state');
 
-      if (referral) {
+      if (referral){
         localStorage.setItem('referral', referral);
       }
 
-      if (!code) {
+      if (!code){
         return;
       }
 
-      githubLogin(code).then();
+      if (state) {
+        googleLogin(code, state).then();
+        params.delete('state');
+        params.delete('scope')
+        params.delete('prompt');
+        params.delete('authuser');
+      } else {
+        githubLogin(code).then();
+      }
 
       params.delete('code');
 

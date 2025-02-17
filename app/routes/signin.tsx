@@ -6,13 +6,13 @@ import CopyRighting from '~/components/common/copyRight';
 import GoogleLogin from '../assets/icons/google-login.svg';
 import GitHubIcon from '../assets/icons/fi-brands-github.svg';
 import { useUser } from '~/ai/lib/context/userContext';
-import { handleGitHubAuth } from '~/ai/lib/stores/user/user';
+import { handleGitHubAuth, handleGoogleAuth } from '~/ai/lib/stores/user/user';
 import { UserLoginContextType } from '~/types/user';
 import InfoIcon from '~/assets/icons/infoIcon.svg';
 
 function SignIn() {
   const navigate = useNavigate();
-  const { login, isLoggedIn } = useUser();
+  const { login, isLoggedIn, setGoogleState } = useUser();
 
   useEffect(() => {
     if (!isLoggedIn()) {
@@ -65,6 +65,13 @@ function SignIn() {
       setError(err.message || 'Something went wrong');
     }
   };
+
+  const preHandleGoogleAuth = () => {
+    const state = crypto.randomUUID().toString();
+    setGoogleState(state);
+
+    handleGoogleAuth(state);
+  }
 
   return (
     <div className="flex items-center flex-col justify-between h-screen signin-bg">
@@ -140,8 +147,8 @@ function SignIn() {
               <button
                 type="button"
                 className="w-full text-[18px] flex items-center justify-center font-[400] bg-[#fff] text-[black] google-login"
-                disabled={isLoggedIn()}
-              >
+                onClick={preHandleGoogleAuth}
+                disabled={isLoggedIn()}>
                 <img className="mr-[10px]" src={GoogleLogin} alt={'google-login'} />
                 Login With Google
               </button>
@@ -153,7 +160,7 @@ function SignIn() {
               >
                 <img alt={'github-login'} className="mr-[10px]" src={GitHubIcon} />
                 Login With GitHub
-              </button>
+              </button> 
             </div>
             <NavLink to="/signup" style={{ paddingTop: '9px' }}>
               <span className="create-account">Create An Account</span>
