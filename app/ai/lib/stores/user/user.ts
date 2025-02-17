@@ -98,7 +98,7 @@ export async function confirmPassword({ token, password }: { token: string; pass
 
 export async function handleGitHubLogin(code: string) {
   try {
-    const response = await fetch(`${BASE_URL}/user/github/${code}`, {
+    const response = await fetch(`${BASE_URL}/auth/github/${code}`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
     });
@@ -118,6 +118,31 @@ export async function handleGitHubLogin(code: string) {
 export function handleGitHubAuth() {
   const scope = 'repo:status repo_deployment user:email';
   window.location.href = `https://github.com/login/oauth/authorize?client_id=${import.meta.env.CUSTOM_GITHUB_CLIENT_ID}&redirect_uri=${import.meta.env.CUSTOM_GITHUB_REDIRECT_URI}&scope=${encodeURIComponent(scope)}`;
+}
+
+export async function handleGoogleLogin(code: string){
+  try {
+    const response = await fetch(`${BASE_URL}/auth/google-auth-callback?code=${code}`, {
+      method: 'POST',
+      headers: { 'Content-type': 'application/json' },
+    });
+
+    const jsonRes = await response.json();
+
+    if(!response.ok){
+      throw new Error((jsonRes as { message: string }).message || 'Failed to authenticate with Google');
+    }
+
+    return jsonRes as UserSession;
+  } catch (error){
+    throw new Error((error as { message: string })?.message || 'Something went wrong')
+  }
+}
+
+export async function handleGoogleAuth(state: string){
+  const scope = 'email'
+  const authUrl = `https://accounts.google.com/o/oauth2/v2/auth?scope=${encodeURIComponent(scope)}&access_type=online&include_granted_scopes=true&response_type=code&state=${state}&redirect_uri=${import.meta.env.CUSTOM_BASE_URL}&client_id=${import.meta.env.CUSTOM_GOOGLE_CLIENT_ID}`;
+  window.location.href = authUrl;
 }
 
 export async function doRefresh(refreshToken: string) {
