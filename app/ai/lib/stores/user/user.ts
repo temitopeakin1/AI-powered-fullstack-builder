@@ -98,7 +98,7 @@ export async function confirmPassword({ token, password }: { token: string; pass
 
 export async function handleGitHubLogin(code: string) {
   try {
-    const response = await fetch(`${BASE_URL}/auth/github/${code}`, {
+    const response = await fetch(`${BASE_URL}/user/github/${code}`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
     });
@@ -122,7 +122,7 @@ export function handleGitHubAuth() {
 
 export async function handleGoogleLogin(code: string){
   try {
-    const response = await fetch(`${BASE_URL}/auth/google-auth-callback?code=${code}`, {
+    const response = await fetch(`${BASE_URL}/user/google-auth-callback?code=${code}`, {
       method: 'POST',
       headers: { 'Content-type': 'application/json' },
     });
