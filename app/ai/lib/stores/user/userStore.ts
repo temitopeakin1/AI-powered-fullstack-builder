@@ -1,6 +1,7 @@
 import { expirationSettings, UserSession } from '~/types/user';
-import { confirmUserEmail, doRefresh, getUserByToken, handleGitHubLogin, loginUser, logoutUser } from './user';
+import { confirmUserEmail, doRefresh, getUserByToken, handleGitHubLogin, handleGoogleLogin, loginUser, logoutUser } from './user';
 import { add, isAfter, isBefore } from 'date-fns';
+
 
 /**
  * Singleton class for managing user session state.
@@ -15,6 +16,11 @@ export class UserStore {
    * Existing user session.
    */
   private _user: UserSession | null = null;
+
+  /**
+   * Google state
+   */
+  private _googleState: string | null = null;
 
   /**
    * Promise to track ongoing token refresh operations.
@@ -84,6 +90,35 @@ export class UserStore {
 
     return localUser;
   };
+
+  /**
+   * Set the current google state and update localStorage
+   * @param {string | null} state - The state to set.
+   */
+  setGoogleState = (state: string | null) => {
+    this._googleState = state
+
+    localStorage.setItem('googleState', state ? state : '');
+  }
+
+  /**
+   * Retrieves the current google state
+   */
+  getGoogleState = (): string | null => {
+    if(this._googleState){
+      return this._googleState;
+    }
+    
+    let localGoogleState: string | null = null;
+
+    try {
+      localGoogleState = localStorage.getItem('googleState') as string;
+    } catch (_){
+      // ignore
+    }
+
+    return localGoogleState;
+  }
 
   /**
    * Sets expiration timestamps for the user's token and refresh token.
@@ -158,6 +193,38 @@ export class UserStore {
 
     this.setUserExpiration(loggedUser as UserSession);
   };
+
+   /**
+   * Handles Google OAuth login.
+   * @param {string} code - The Google authorization code.
+   * @param {string} state - The random generated state
+   * @throws {Error} If the code is missing.
+   */
+   googleLogin = async (code: string, state: string) => {
+    if (!code) {
+      throw new Error('Missing Google code for login.');
+    }
+
+    if(!state){
+      throw new Error('Missing Google state for login.');
+    }
+
+    const localGoogleState = this.getGoogleState();
+        if(localGoogleState != state){
+          throw new Error("Provided state is invalid");
+        }
+
+    if (this.isLoggedIn()) {
+      return;
+    }
+
+    // User Store si local storage stocam state ul si dupa il verif si sterg
+
+    const loggedUser = await handleGoogleLogin(code);
+
+    this.setUserExpiration(loggedUser as UserSession);
+  };
+
 
   /**
    * Logs out the current user and clears session data.
