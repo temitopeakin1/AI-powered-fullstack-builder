@@ -98,7 +98,7 @@ export async function confirmPassword({ token, password }: { token: string; pass
 
 export async function handleGitHubLogin(code: string) {
   try {
-    const response = await fetch(`${BASE_URL}/auth/github/${code}`, {
+    const response = await fetch(`${BASE_URL}/user/github/${code}`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
     });
