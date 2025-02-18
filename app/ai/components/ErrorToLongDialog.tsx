@@ -47,7 +47,6 @@ const ErrorTooLongDialog: FC<ErrorTooLongDialogProps> = ({ isOpen, onEdit, onClo
   return (
     <RadixDialog.Root open={isOpen}>
       <RadixDialog.Portal>
-        {/* Overlay with lower z-index */}
         <RadixDialog.Overlay asChild>
           <motion.div
             className="bg-black/50 fixed inset-0 z-40"
@@ -59,7 +58,6 @@ const ErrorTooLongDialog: FC<ErrorTooLongDialogProps> = ({ isOpen, onEdit, onClo
           />
         </RadixDialog.Overlay>
 
-        {/* Dialog content with higher z-index and stopping propagation */}
         <RadixDialog.Content asChild>
           <motion.div
             onClick={(e) => e.stopPropagation()} // Prevent click events from bubbling to the overlay
@@ -74,6 +72,8 @@ const ErrorTooLongDialog: FC<ErrorTooLongDialogProps> = ({ isOpen, onEdit, onClo
             exit="closed"
             variants={dialogVariants}
           >
+
+
             {/* Decorative ellipse */}
             <div
               style={{
@@ -106,6 +106,9 @@ const ErrorTooLongDialog: FC<ErrorTooLongDialogProps> = ({ isOpen, onEdit, onClo
               <h2
                 className="_textWeight_ybcgn_45 text-white text-[18px] xl:text-[30px] not-italic font-semibold leading-[30px] xl:leading-[56px]"
               >
+            <div className="px-6 pb-6 flex items-center gap-2">
+              <img src={dizzy} alt=""  className="mt-1"/>
+              <h2 className="_textWeight_u905f_45 text-white text-[30px] not-italic font-semibold leading-[56px]">
                 Whoa, That's a Lot of Text!
               </h2>
             </div>
@@ -120,6 +123,8 @@ const ErrorTooLongDialog: FC<ErrorTooLongDialogProps> = ({ isOpen, onEdit, onClo
             <div className="px-6 pb-6 bg-bolt-elements-background-depth-2">
               <button
                 onClick={onClose}
+                className="inline-flex items-center justify-center rounded-[500px] px-5 py-5 md:px-6 md:py-4 text-lg text-white leading-none focus:outline-none border border-[#777] md:min-w-[190px] w-full md:w-auto bg-[#030303] hover:bg-biela-elements-button-secondary-backgroundHover"
+                onClick={onEdit}
                 className="inline-flex items-center justify-center rounded-[500px] px-5 py-5 md:px-6 md:py-4 text-lg text-white leading-none focus:outline-none border border-[#777] md:min-w-[190px] w-full md:w-auto bg-[#030303] hover:bg-biela-elements-button-secondary-backgroundHover"
               >
                 Try Again
