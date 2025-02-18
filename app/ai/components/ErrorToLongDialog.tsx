@@ -1,5 +1,8 @@
 import React, { FC, UIEvent } from 'react';
-import { Dialog, DialogButton, DialogDescription, DialogRoot, DialogTitle } from './Dialog';
+import * as RadixDialog from '@radix-ui/react-dialog';
+import { motion, type Variants } from 'framer-motion';
+import dizzy from '/icons/dizzy.svg';
+import close from '/icons/fi-sr-cross.svg';
 
 interface ErrorTooLongDialogProps {
   isOpen: boolean;
@@ -7,27 +10,117 @@ interface ErrorTooLongDialogProps {
   onClose: () => void;
 }
 
+const transition = {
+  duration: 0.15,
+  ease: [0.4, 0, 0.2, 1],
+};
+
+const backdropVariants: Variants = {
+  closed: {
+    opacity: 0,
+    transition,
+  },
+  open: {
+    opacity: 1,
+    transition,
+  },
+};
+
+const dialogVariants: Variants = {
+  closed: {
+    x: '-50%',
+    y: '-40%',
+    scale: 0.96,
+    opacity: 0,
+    transition,
+  },
+  open: {
+    x: '-50%',
+    y: '-50%',
+    scale: 1,
+    opacity: 1,
+    transition,
+  },
+};
+
 const ErrorTooLongDialog: FC<ErrorTooLongDialogProps> = ({ isOpen, onEdit, onClose }) => {
   return (
-    <DialogRoot open={isOpen}>
-      <Dialog onBackdrop={onClose} onClose={onClose}>
-        <DialogTitle>
-          Whoa, That’s a Lot of Text!
-        </DialogTitle>
-        <DialogDescription asChild>
-          <div>
-            <p>
-              Looks like your message is too big to send all at once! Try breaking it into smaller parts and sending them separately.
-            </p>
-          </div>
-        </DialogDescription>
-        <div className="px-6 pb-6 bg-bolt-elements-background-depth-2 flex gap-2 footer-modal">
-          <DialogButton type="primary" onClick={onEdit}>
-            Edit Message
-          </DialogButton>
-        </div>
-      </Dialog>
-    </DialogRoot>
+    <RadixDialog.Root open={isOpen}>
+      <RadixDialog.Portal>
+        <RadixDialog.Overlay asChild>
+          <motion.div
+            className="bg-black/50 fixed inset-0 z-max"
+            initial="closed"
+            animate="open"
+            exit="closed"
+            variants={backdropVariants}
+            onClick={onClose}
+          />
+        </RadixDialog.Overlay>
+
+        <RadixDialog.Content asChild>
+          <motion.div
+            className="fixed top-[50%] left-[50%] z-max max-h-[85vh] w-[847px] translate-x-[-50%] translate-y-[-50%] rounded-lg bg-biela-elements-background-depth-2 shadow-lg focus:outline-none overflow-hidden"
+            style={{
+              borderRadius: '12px',
+              border: '2px solid rgba(0, 0, 0, 0.00)',
+              background: 'linear-gradient(0deg, rgba(5, 5, 5, 0.00) 24.45%, rgba(242, 1, 1, 0.10) 76.64%)',
+            }}
+            initial="closed"
+            animate="open"
+            exit="closed"
+            variants={dialogVariants}
+          >
+
+
+            {/* Decorative ellipse */}
+            <div
+              style={{
+                borderRadius: '847px',
+                background: 'linear-gradient(180deg, #F20100 50.04%, #030404 140.18%)',
+                filter: 'blur(5px)',
+                width: '150%',
+                height: '9px',
+                margin: '0 auto 20px auto',
+              }}
+              className={'too-much-text'}
+            />
+
+            {/* Close button */}
+            <button
+              onClick={onClose}
+              className="absolute border border-white/25 top-4 right-4 w-6 h-6 flex items-center justify-center rounded-full bg-black/20 hover:bg-black/30 transition-colors duration-200"
+              aria-label="Close dialog"
+            >
+              <img src={close} alt="" />
+            </button>
+
+            <div className="px-6 pb-6 flex items-center gap-2">
+              <img src={dizzy} alt="" />
+              <h2 className="font-inter text-white text-[36px] not-italic font-semibold leading-[56px]">
+                Whoa, That's a Lot of Text!
+              </h2>
+            </div>
+
+            <div className="px-6 pb-6">
+              <p className="font-inter text-white text-[20px] not-italic font-medium leading-normal">
+                Looks like your message is too big to send all at once! Try breaking it into
+                smaller parts and sending them separately.
+              </p>
+            </div>
+
+            <div className="px-6 pb-6 bg-bolt-elements-background-depth-2">
+              <button
+                onClick={onEdit}
+                className="glass-button bg-[#86F49C] text-black hover:opacity-90 rounded-full py-3 px-8 transition-opacity mb-4"
+              >
+                Edit Message
+              </button>
+            </div>
+          </motion.div>
+        </RadixDialog.Content>
+      </RadixDialog.Portal>
+    </RadixDialog.Root>
   );
 };
 

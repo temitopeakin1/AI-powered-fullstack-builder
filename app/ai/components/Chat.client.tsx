@@ -171,10 +171,10 @@ const logger = createScopedLogger('Chat');
 export function Chat() {
   renderLogger.trace('Chat');
 
-  const [isErrorTooLongDialogOpen, setErrorTooLongDialogOpen] = useState(false);
+  const [isErrorTooLongDialogOpen, setErrorTooLongDialogOpen] = useState(true);
 
   const handleEditMessage = (event: React.UIEvent) => {
-    setErrorTooLongDialogOpen(false);
+    setErrorTooLongDialogOpen(true);
     // Assuming textareaRef is available in Chat or you can forward the ref appropriately
     // textareaRef.current?.focus();
   };
@@ -283,7 +283,7 @@ export const ChatImpl = memo(
     const [isErrorTooLongDialogOpen, setErrorTooLongDialogOpen] = useState(false);
 
     const handleEditMessage = (event: React.UIEvent) => {
-      setErrorTooLongDialogOpen(false);
+      setErrorTooLongDialogOpen(true);
       textareaRef.current?.focus();
     };
 
