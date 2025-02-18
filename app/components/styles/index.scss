@@ -97,7 +97,20 @@ svg.device-btn-icon {
     width: 16px;
   }
 }
-
+.too-much-text {
+  position:relative;
+}
+.too-much-text:after {
+  content: "";
+  position: absolute;
+  inset: -1px;
+  border-radius: 16px;
+  padding: 2px;
+  background: linear-gradient(135deg, rgb(255 0 0 / 50%) 0%, rgba(255, 0, 0, 0.2) 90%, rgb(255 0 0 / 50%) 100% 81%);
+  -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+}
 // glass effect for buttons
 .glass-button {
   position: relative;

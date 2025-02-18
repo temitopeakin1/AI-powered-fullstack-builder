@@ -114,6 +114,11 @@ export const Dialog = memo(({ className, children, onBackdrop, onClose }: Dialog
             'fixed top-[50%] left-[50%] z-max max-h-[85vh] w-[90vw] max-w-[600px] translate-x-[-50%] translate-y-[-50%] border border-biela-elements-borderColor rounded-lg bg-biela-elements-background-depth-2 shadow-lg focus:outline-none overflow-hidden modal-delete-chat',
             className,
           )}
+          style={{
+            borderRadius: '12px',
+            border: '2px solid rgba(0, 0, 0, 0.00)',
+            background: 'linear-gradient(0deg, rgba(5, 5, 5, 0.00) 24.45%, rgba(242, 1, 1, 0.10) 76.64%)',
+          }}
           initial="closed"
           animate="open"
           exit="closed"
