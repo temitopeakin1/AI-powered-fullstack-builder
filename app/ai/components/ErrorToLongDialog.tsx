@@ -1,4 +1,4 @@
-import React, { FC, UIEvent } from 'react';
+import React, { FC } from 'react';
 import * as RadixDialog from '@radix-ui/react-dialog';
 import { motion, type Variants } from 'framer-motion';
 import dizzy from '/icons/dizzy.svg';
@@ -6,7 +6,7 @@ import close from '/icons/fi-sr-cross.svg';
 
 interface ErrorTooLongDialogProps {
   isOpen: boolean;
-  onEdit: (event: UIEvent) => void;
+  onEdit: () => void;
   onClose: () => void;
 }
 
@@ -47,9 +47,10 @@ const ErrorTooLongDialog: FC<ErrorTooLongDialogProps> = ({ isOpen, onEdit, onClo
   return (
     <RadixDialog.Root open={isOpen}>
       <RadixDialog.Portal>
+        {/* Overlay with lower z-index */}
         <RadixDialog.Overlay asChild>
           <motion.div
-            className="bg-black/50 fixed inset-0 z-max"
+            className="bg-black/50 fixed inset-0 z-40"
             initial="closed"
             animate="open"
             exit="closed"
@@ -58,20 +59,21 @@ const ErrorTooLongDialog: FC<ErrorTooLongDialogProps> = ({ isOpen, onEdit, onClo
           />
         </RadixDialog.Overlay>
 
+        {/* Dialog content with higher z-index and stopping propagation */}
         <RadixDialog.Content asChild>
           <motion.div
-            className="fixed too-much-text top-[50%] left-[50%] py-[24px] z-max max-h-[85vh] w-[847px] translate-x-[-50%] translate-y-[-50%] rounded-lg bg-biela-elements-background-depth-2 shadow-lg focus:outline-none overflow-hidden"
+            onClick={(e) => e.stopPropagation()} // Prevent click events from bubbling to the overlay
+            className="fixed too-much-text top-[50%] left-[50%] py-[24px] z-50 max-h-[85vh] w-[90%] xl:w-[847px] translate-x-[-50%] translate-y-[-50%] rounded-lg bg-biela-elements-background-depth-2 shadow-lg focus:outline-none overflow-hidden"
             style={{
               borderRadius: '12px',
-              background: 'linear-gradient(0deg, rgba(5, 5, 5, 0.00) 24.45%, rgba(242, 1, 1, 0.10) 76.64%)',
+              background:
+                'linear-gradient(0deg, rgba(5, 5, 5, 0.00) 24.45%, rgba(242, 1, 1, 0.10) 76.64%)',
             }}
             initial="closed"
             animate="open"
             exit="closed"
             variants={dialogVariants}
           >
-
-
             {/* Decorative ellipse */}
             <div
               style={{
@@ -86,7 +88,6 @@ const ErrorTooLongDialog: FC<ErrorTooLongDialogProps> = ({ isOpen, onEdit, onClo
                 left: 0,
                 right: 0,
               }}
-
             />
 
             {/* Close button */}
@@ -98,15 +99,19 @@ const ErrorTooLongDialog: FC<ErrorTooLongDialogProps> = ({ isOpen, onEdit, onClo
               <img src={close} alt="" />
             </button>
 
-            <div className="px-6 pb-6 flex items-center gap-2">
-              <img src={dizzy} alt=""  className="mt-1"/>
-              <h2 className="_textWeight_u905f_45 text-white text-[30px] not-italic font-semibold leading-[56px]">
+            <div className="p-6 grid xl:flex items-center gap-8 xl:gap-2">
+              <div className="flex justify-center">
+                <img src={dizzy} alt="" className="mt-1 w-16 xl:w-8" />
+              </div>
+              <h2
+                className="_textWeight_ybcgn_45 text-white text-[18px] xl:text-[30px] not-italic font-semibold leading-[30px] xl:leading-[56px]"
+              >
                 Whoa, That's a Lot of Text!
               </h2>
             </div>
 
             <div className="px-6 pb-6">
-              <p className="font-inter text-white text-[20px] not-italic font-medium leading-normal">
+              <p className="font-inter font-light text-white text-base xl:text-[20px] not-italic leading-normal">
                 Looks like your message is too big to send all at once! Try breaking it into
                 smaller parts and sending them separately.
               </p>
@@ -114,10 +119,10 @@ const ErrorTooLongDialog: FC<ErrorTooLongDialogProps> = ({ isOpen, onEdit, onClo
 
             <div className="px-6 pb-6 bg-bolt-elements-background-depth-2">
               <button
-                onClick={onEdit}
+                onClick={onClose}
                 className="inline-flex items-center justify-center rounded-[500px] px-5 py-5 md:px-6 md:py-4 text-lg text-white leading-none focus:outline-none border border-[#777] md:min-w-[190px] w-full md:w-auto bg-[#030303] hover:bg-biela-elements-button-secondary-backgroundHover"
               >
-                Edit Message
+                Try Again
               </button>
             </div>
           </motion.div>

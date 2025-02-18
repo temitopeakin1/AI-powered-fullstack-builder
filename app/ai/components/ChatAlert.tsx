@@ -128,7 +128,7 @@ export default function ChatAlert({ alert, clearAlert, postMessage }: Props) {
                     >
                       <div className={'flex items-center gap-[10px] relative z-2 font-light'}>
                         <FiSrCross />
-                        Dissmiss
+                        Dismiss
                       </div>
                     </button>
                     <WithTooltip tooltip={`${errorDetails ? 'Hide Error Details' : 'Error Details'}`}>

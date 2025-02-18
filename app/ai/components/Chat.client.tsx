@@ -31,6 +31,7 @@ import { Header } from '~/components/common/Header/Header';
 import { uploadChatMessages } from '~/ai/lib/stores/projects/chat';
 import { backendApiFetch } from '~/ai/lib/backend-api';
 import ErrorTooLongDialog from '~/ai/components/ErrorToLongDialog';
+import ErrorSupabaseDialog from '~/ai/components/ErrorSupabaseDialog';
 
 interface FileData {
   type: 'file' | 'folder';
@@ -171,12 +172,15 @@ const logger = createScopedLogger('Chat');
 export function Chat() {
   renderLogger.trace('Chat');
 
-  const [isErrorTooLongDialogOpen, setErrorTooLongDialogOpen] = useState(true);
+  const [isErrorTooLongDialogOpen, setErrorTooLongDialogOpen] = useState(false);
+  const [isErrorSupabaseDialogOpen, setErrorSupabaseDialogOpen] = useState(false);
 
   const handleEditMessage = (event: React.UIEvent) => {
-    setErrorTooLongDialogOpen(true);
-    // Assuming textareaRef is available in Chat or you can forward the ref appropriately
-    // textareaRef.current?.focus();
+    setErrorTooLongDialogOpen(false);
+  };
+
+  const handleSupabaseMessage = (event: React.UIEvent) => {
+    setErrorSupabaseDialogOpen(false);
   };
 
   const { ready, initialMessages, storeMessageHistory, importChat, exportChat } = useChatHistory();
@@ -272,8 +276,11 @@ interface ChatProps {
   exportChat: () => void;
   description?: string;
   isErrorTooLongDialogOpen: boolean;
+  isErrorSupabaseDialogOpen: boolean;
   setErrorTooLongDialogOpen: React.Dispatch<React.SetStateAction<boolean>>;
+  setErrorSupabaseDialogOpen: React.Dispatch<React.SetStateAction<boolean>>
   handleEditMessage: (event: React.UIEvent) => void;
+  handleSupabaseMessage: (event: React.UIEvent) => void;
 }
 
 export const ChatImpl = memo(
@@ -281,12 +288,16 @@ export const ChatImpl = memo(
     useShortcuts();
 
     const [isErrorTooLongDialogOpen, setErrorTooLongDialogOpen] = useState(false);
+    const [isErrorSupabaseDialogOpen, setErrorSupabaseDialogOpen] = useState(false);
 
     const handleEditMessage = (event: React.UIEvent) => {
-      setErrorTooLongDialogOpen(true);
+      setErrorTooLongDialogOpen(false);
       textareaRef.current?.focus();
     };
-
+    const handleSupabaseMessage = (event: React.UIEvent) => {
+      setErrorSupabaseDialogOpen(false);
+      textareaRef.current?.focus();
+    };
     const textareaRef = useRef<HTMLTextAreaElement>(null);
     const [chatStarted, setChatStarted] = useState(initialMessages?.length > 0 || false);
     const [uploadedFiles, setUploadedFiles] = useState<File[]>([]); // Move here
@@ -321,8 +332,12 @@ export const ChatImpl = memo(
       sendExtraMessageFields: true,
       onError: (error) => {
         logger.error('Request failed\n\n', error);
-        setErrorTooLongDialogOpen(true);
+        setErrorSupabaseDialogOpen(true);
       },
+      // onError: (error) => {
+      //   logger.error('Request failed\n\n', error);
+      //   setErrorTooLongDialogOpen(true);
+      // },
       // onError: (error) => {
       //   logger.error('Request failed\n\n', error);
       //   toast.error(
@@ -955,11 +970,19 @@ export const ChatImpl = memo(
           clearAlert={() => workbenchStore.clearAlert()}
         />
 
-        {isErrorTooLongDialogOpen && (
-          <ErrorTooLongDialog
-            isOpen={isErrorTooLongDialogOpen}
-            onEdit={handleEditMessage}
-            onClose={() => setErrorTooLongDialogOpen(false)}
+        {/*{isErrorTooLongDialogOpen && (*/}
+        {/*  <ErrorTooLongDialog*/}
+        {/*    isOpen={isErrorTooLongDialogOpen}*/}
+        {/*    onEdit={handleEditMessage}*/}
+        {/*    onClose={() => setErrorTooLongDialogOpen(false)}*/}
+        {/*  />*/}
+        {/*)}*/}
+
+        {isErrorSupabaseDialogOpen && (
+          <ErrorSupabaseDialog
+            isOpen={isErrorSupabaseDialogOpen}
+            onEdit={handleSupabaseMessage}
+            onClose={() => setErrorSupabaseDialogOpen(false)}
           />
         )}
       </div>

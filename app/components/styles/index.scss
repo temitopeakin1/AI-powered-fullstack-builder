@@ -98,19 +98,22 @@ svg.device-btn-icon {
   }
 }
 .too-much-text {
-  position:relative;
+  position: relative;
 }
+
 .too-much-text:before {
   content: "";
   position: absolute;
   inset: 0;
   border-radius: 12px;
   padding: 2px;
-  background: linear-gradient(150deg, rgba(255,0,0,1) 0%, rgba(255,0,0,0.5) 10%, rgba(34,32,38,1) 20%, rgba(34,32,38,1) 80%, rgba(255,0,0,0.5) 90%, rgba(255,0,0,1) 100%);
+  background: linear-gradient(150deg, rgba(255, 0, 0, 1) 0%, rgba(255, 0, 0, 0.5) 10%, rgba(34, 32, 38, 1) 20%, rgba(34, 32, 38, 1) 80%, rgba(255, 0, 0, 0.5) 90%, rgba(255, 0, 0, 1) 100%);
   -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
   mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
   -webkit-mask-composite: xor;
+  pointer-events: none; /* Allow clicks to pass through */
 }
+
 // glass effect for buttons
 .glass-button {
   position: relative;
@@ -308,7 +311,7 @@ svg.device-btn-icon {
   max-width: 190px;
 }
 
-.bg-black\/50.fixed.inset-0.z-max {
+.bg-black\/50.fixed.inset-0.z-40 {
   background: linear-gradient(0deg, rgba(0, 0, 0, 0.05) 0%, rgba(31, 31, 31, 0.80) 100%);
   backdrop-filter: blur(25px);
 }
