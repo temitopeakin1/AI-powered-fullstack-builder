@@ -1,3 +1,5 @@
+// can be deleted
+
 import { useState } from 'react';
 import UploadImage from '../../../assets/icons/upload-white.svg';
 import { AddFilesButtonProps } from '~/backOffice/types/project';

@@ -23,7 +23,7 @@ export default function Dashboard() {
   const [filteredProjects, setFilteredProjects] = useState<Project[]>(dummy);
   const [visibleProjectsCount, setVisibleProjectsCount] = useState(4);
   const [sortBy, setSortBy] = useState('Recently Created');
-  const [modalType, setModalType] = useState<'create' | 'upload' | 'addDatabase' | null>(null);
+  const [modalType, setModalType] = useState<'create' | 'import' | 'addDatabase' | null>(null);
   const { isLoggedIn } = useUser();
 
   const sortProjects = (condition: string) => {
@@ -51,8 +51,8 @@ export default function Dashboard() {
     setModalType('create');
   };
 
-  const openProjectUploadModal = () => {
-    setModalType('upload');
+  const openProjectImportModal = () => {
+    setModalType('import');
   };
 
   const closeModal = () => {
@@ -88,7 +88,7 @@ export default function Dashboard() {
           <ActionCard
             projectsCount={filteredProjects.length}
             onCreateProjectClick={openCreateProjectModal}
-            onProjectUpload={openProjectUploadModal}
+            onProjectImport={openProjectImportModal}
           />
           <ProjectsSection
             projects={filteredProjects.slice(0, visibleProjectsCount)}
@@ -111,7 +111,7 @@ export default function Dashboard() {
         </div>
       )}
 
-      {modalType === 'upload' && (
+      {modalType === 'import' && (
         <div className="fixed inset-0 flex items-center justify-center z-50">
           <div className="absolute inset-0" onClick={closeModal} />
           <ProjectUpload closeModal={closeModal} />
