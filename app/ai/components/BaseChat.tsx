@@ -3,34 +3,34 @@
  * @ts-nocheck
  * Preventing TS checks with files presented in the video for a better presentation.
  */
-import type { Message } from "ai";
-import React, { type RefCallback, useEffect, useState } from "react";
-import { ClientOnly } from "remix-utils/client-only";
-import { classNames } from "~/utils/classNames";
-import { Messages } from "./Messages.client";
-import { SendButton } from "./SendButton.client";
-import * as Tooltip from "@radix-ui/react-tooltip";
-import styles from "../styles/BaseChat.module.scss";
-import FilePreview from "./FilePreview";
-import { ScreenshotStateManager } from "./ScreenshotStateManager";
-import { toast } from "react-toastify";
-import type { ActionAlert } from "~/types/actions";
-import ChatAlert from "./ChatAlert";
-import "../../components/styles/ainmated-spinner.scss";
-import TokenRemaining from "./TokensRemaining.client";
-import { ChatCodeSwitch } from "~/ai/components/ChatCodeSwitch";
-import WithTooltip from "./Tooltip";
-import { IconButton } from "~/components/common/IconButton";
-import FileIcon from "~/assets/icons/fileIcon";
-import { SpeechRecognitionButton } from "~/ai/components/SpeechRecognition";
-import CopyRighting from "~/components/common/copyRight";
-import { Workbench } from "~/ai/components/workbench/Workbench.client";
-import { ExamplePrompts } from "~/ai/components/ExamplePrompts";
-import { Menu } from "./Menu.client";
-import NewBgBiela from "~/assets/icons/new-biela.png";
-import MagicIcon from "../../assets/icons/magicIcon.svg";
-import { createScopedLogger } from "~/utils/logger";
-import CleanUpIcon from "~/assets/icons/refresh.svg";
+import type { Message } from 'ai';
+import React, { type RefCallback, useEffect, useState } from 'react';
+import { ClientOnly } from 'remix-utils/client-only';
+import { classNames } from '~/utils/classNames';
+import { Messages } from './Messages.client';
+import { SendButton } from './SendButton.client';
+import * as Tooltip from '@radix-ui/react-tooltip';
+import styles from '../styles/BaseChat.module.scss';
+import FilePreview from './FilePreview';
+import { ScreenshotStateManager } from './ScreenshotStateManager';
+import { toast } from 'react-toastify';
+import type { ActionAlert } from '~/types/actions';
+import ChatAlert from './ChatAlert';
+import '../../components/styles/ainmated-spinner.scss';
+import TokenRemaining from './TokensRemaining.client';
+import { ChatCodeSwitch } from '~/ai/components/ChatCodeSwitch';
+import WithTooltip from './Tooltip';
+import { IconButton } from '~/components/common/IconButton';
+import FileIcon from '~/assets/icons/fileIcon';
+import { SpeechRecognitionButton } from '~/ai/components/SpeechRecognition';
+import CopyRighting from '~/components/common/copyRight';
+import { Workbench } from '~/ai/components/workbench/Workbench.client';
+import { ExamplePrompts } from '~/ai/components/ExamplePrompts';
+import { Menu } from './Menu.client';
+import NewBgBiela from '~/assets/icons/new-biela.png';
+import MagicIcon from '../../assets/icons/magicIcon.svg';
+import { createScopedLogger } from '~/utils/logger';
+import CleanUpIcon from '~/assets/icons/refresh.svg';
 import ChatSuggestion from '~/ai/components/ChatSuggestion';
 import CheckList from '~/assets/icons/checkList';
 import { chatStore, setCheckingList, setCleaningProject, setShowPrompt } from '~/ai/lib/stores/chat';
@@ -389,7 +389,7 @@ export const BaseChat = React.forwardRef<HTMLDivElement, BaseChatProps>(
       setCleaningProject(true);
 
       const cleanUpPrompt =
-        'Please clean up the project by ensuring no files has maximum 300 lines of code and delete all the unused files, code, components or any other piece of data you consider is not used anymore. Make sure what we update is not affecting the current functionality, make sure all the components stays connected.';
+        'Clean up the project by ensuring no single file exceeds 300 lines of code. Refactor large files into smaller, modular components while maintaining full functionality. Identify and remove all unused files, code, components, and any redundant data that are no longer needed. Ensure that all components remain properly connected and functional, avoiding any disruptions to the existing system. Maintain code integrity by verifying that no changes introduce errors or break current features. The goal is to optimize the project for efficiency, maintainability, and clarity.';
       sendMessage?.({} as React.UIEvent, cleanUpPrompt);
     };
 
