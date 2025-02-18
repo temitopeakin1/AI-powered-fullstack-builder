@@ -6,6 +6,7 @@ export const chatStore = map({
   showChat: true,
   showPrompt: false,
   checkingList: false,
+  errorDetails: false,
   cleaningProject: false,
   mode: 'code' as 'chat' | 'code',
   isStreaming: false,
@@ -34,3 +35,7 @@ export function setCheckingList(checkingList: false | true) {
 export function setCleaningProject(cleaningProject: false | true) {
   chatStore.setKey('cleaningProject', cleaningProject);
 }
+export function setErrorDetails(errorDetails: false | true) {
+  chatStore.setKey('errorDetails', errorDetails);
+}
+
