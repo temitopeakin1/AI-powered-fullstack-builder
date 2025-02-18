@@ -60,10 +60,9 @@ const ErrorTooLongDialog: FC<ErrorTooLongDialogProps> = ({ isOpen, onEdit, onClo
 
         <RadixDialog.Content asChild>
           <motion.div
-            className="fixed top-[50%] left-[50%] z-max max-h-[85vh] w-[847px] translate-x-[-50%] translate-y-[-50%] rounded-lg bg-biela-elements-background-depth-2 shadow-lg focus:outline-none overflow-hidden"
+            className="fixed too-much-text top-[50%] left-[50%] py-[24px] z-max max-h-[85vh] w-[847px] translate-x-[-50%] translate-y-[-50%] rounded-lg bg-biela-elements-background-depth-2 shadow-lg focus:outline-none overflow-hidden"
             style={{
               borderRadius: '12px',
-              border: '2px solid rgba(0, 0, 0, 0.00)',
               background: 'linear-gradient(0deg, rgba(5, 5, 5, 0.00) 24.45%, rgba(242, 1, 1, 0.10) 76.64%)',
             }}
             initial="closed"
@@ -77,13 +76,17 @@ const ErrorTooLongDialog: FC<ErrorTooLongDialogProps> = ({ isOpen, onEdit, onClo
             <div
               style={{
                 borderRadius: '847px',
-                background: 'linear-gradient(180deg, #F20100 50.04%, #030404 140.18%)',
-                filter: 'blur(5px)',
-                width: '150%',
-                height: '9px',
-                margin: '0 auto 20px auto',
+                background: 'linear-gradient(rgb(242, 1, 0) 50.04%, rgb(3, 4, 4) 140.18%)',
+                filter: 'blur(9px)',
+                width: '94%',
+                margin: '0 auto',
+                height: '5px',
+                position: 'absolute',
+                top: 0,
+                left: 0,
+                right: 0,
               }}
-              className={'too-much-text'}
+
             />
 
             {/* Close button */}
