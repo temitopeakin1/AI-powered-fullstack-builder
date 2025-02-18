@@ -128,6 +128,10 @@ function AppContent() {
         return;
       }
 
+      if (code.includes('-')) {
+        return
+      }
+
       if (state) {
         googleLogin(code, state).then();
         params.delete('state');

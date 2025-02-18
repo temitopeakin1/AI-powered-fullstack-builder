@@ -118,6 +118,11 @@ export const BaseChat = React.forwardRef<HTMLDivElement, BaseChatProps>(
     }, [transcript]);
 
     useEffect(() => {
+      localStorage.removeItem('projectUrl');
+      localStorage.removeItem('annonKey');
+    }, []);
+
+    useEffect(() => {
       // Setup speech recognition
       if (typeof window !== 'undefined' && ('SpeechRecognition' in window || 'webkitSpeechRecognition' in window)) {
         const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
@@ -157,6 +162,8 @@ export const BaseChat = React.forwardRef<HTMLDivElement, BaseChatProps>(
         handleInputChange(syntheticEvent);
       }
     }, []);
+
+
 
     const startListening = () => {
       if (recognition) {
@@ -405,6 +412,7 @@ export const BaseChat = React.forwardRef<HTMLDivElement, BaseChatProps>(
       sendMessage?.({} as React.UIEvent, checklistPrompt);
     };
 
+
     const baseChat = (
       <div
         ref={ref}
@@ -475,7 +483,7 @@ export const BaseChat = React.forwardRef<HTMLDivElement, BaseChatProps>(
                     {/*<div className={'loop-border'}></div>*/}
                     {chatStarted && <TokenRemaining isStreaming={isStreaming} />}
                     <div className={classNames(styles.containerUnitTesting, 'w-full')}>
-                      {actionAlert?.type === 'preview' && !isStreaming && (
+                      {actionAlert?.type === 'preview' && (
                         <ChatAlert
                           alert={actionAlert}
                           clearAlert={() => clearAlert?.()}
@@ -494,6 +502,19 @@ export const BaseChat = React.forwardRef<HTMLDivElement, BaseChatProps>(
                           clearAlert={() => clearAlert?.()}
                           postMessage={() => {
                             sendMessage?.({} as React.UIEvent, 'Run Unit Tests for my Project');
+                            clearAlert?.();
+                          }}
+                        />
+                      )}
+                      {actionAlert?.type === 'database' && !isStreaming && (
+                        <ChatSuggestion
+                          title={'Database Creation'}
+                          message={'Would you like to create a database for your project?'}
+                          primaryButtonText={'Create Database'}
+                          secondaryButtonText={'Dismiss'}
+                          clearAlert={() => clearAlert?.()}
+                          postMessage={() => {
+                            sendMessage?.({} as React.UIEvent, 'Create a database for my project');
                             clearAlert?.();
                           }}
                         />

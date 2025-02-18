@@ -1,12 +1,14 @@
 import { WebContainer } from '@webcontainer/api';
 import { atom, map, type MapStore } from 'nanostores';
 import * as nodePath from 'node:path';
-import type { ActionAlert, bielaAction } from '~/types/actions';
+import type { ActionAlert, bielaAction,MigrationAction } from '~/types/actions';
 import { createScopedLogger } from '~/utils/logger';
 import { unreachable } from '~/utils/unreachable';
 import type { ActionCallbackData } from './message-parser';
 import type { bielaShell } from '~/utils/shell';
 import { LastInputOnTerminal } from '~/ai/lib/stores/lastInputOnTerminal';
+import {backendApiFetch} from "~/ai/lib/backend-api";
+import {UserStore} from "~/ai/lib/stores/user/userStore";
 
 const logger = createScopedLogger('ActionRunner');
 
@@ -169,6 +171,10 @@ export class ActionRunner {
           await this.#runFileAction(action);
           break;
         }
+        case 'migration': {
+          await this.#runMigrationAction(action);
+          break;
+        }
         case 'start': {
           // making the start app non blocking
 
@@ -321,5 +327,75 @@ export class ActionRunner {
     const actions = this.actions.get();
 
     this.actions.setKey(id, { ...actions[id], ...newState });
+  }
+
+  async #runMigrationAction(action: ActionState) {
+    if (action.type !== 'migration') {
+      unreachable('Expected migration action');
+    }
+
+    const userStore = UserStore.getInstance();
+    const user = userStore.getUser();
+
+    if (!user) {
+      return;
+    }
+    try {
+      const webcontainer = await this.#webcontainer;
+      const cleanPath = action.path.replace(/^\/home\/project\//, '');
+      const fileContent = await webcontainer.fs.readFile(cleanPath, 'utf-8');
+      const chatId = localStorage.getItem('chatID');
+      const projectSlug =localStorage.getItem('projectSlug');
+
+
+      if (!projectSlug) {
+        throw new Error('Project not found');
+      }
+
+      const response = await backendApiFetch(`/supabase/migration`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          migrationContent: fileContent,
+          path: cleanPath,
+          projectSlug: projectSlug
+        })
+      });
+
+      const migrationResponse = await response.json();
+
+
+      if (migrationResponse.success === false) {
+
+        logger.error('Migration API error', {
+          status: migrationResponse.status,
+          error: migrationResponse
+        });
+        //
+        // this.onAlert?.({
+        //   type: 'preview',
+        //   title: 'Migration Failed',
+        //   description: migrationResponse.message,
+        //   content: migrationResponse.error,
+        // });
+
+        throw new Error(`Migration API error!`);
+      }
+
+
+      const result = await response.json();
+      logger.info('Migration executed successfully:', result);
+
+      return result;
+
+    } catch (error) {
+      logger.error(`Migration failed for user: ${user.id} :`, error);
+      throw new ActionCommandError(
+        'Failed to execute migration',
+        error.message
+      );
+    }
   }
 }
