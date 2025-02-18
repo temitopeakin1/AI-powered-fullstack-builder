@@ -117,13 +117,13 @@ svg.device-btn-icon {
 .too-much-text {
   position:relative;
 }
-.too-much-text:after {
+.too-much-text:before {
   content: "";
   position: absolute;
-  inset: -1px;
-  border-radius: 16px;
+  inset: 0;
+  border-radius: 12px;
   padding: 2px;
-  background: linear-gradient(135deg, rgb(255 0 0 / 50%) 0%, rgba(255, 0, 0, 0.2) 90%, rgb(255 0 0 / 50%) 100% 81%);
+  background: linear-gradient(150deg, rgba(255,0,0,1) 0%, rgba(255,0,0,0.5) 10%, rgba(34,32,38,1) 20%, rgba(34,32,38,1) 80%, rgba(255,0,0,0.5) 90%, rgba(255,0,0,1) 100%);
   -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
   mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
   -webkit-mask-composite: xor;
