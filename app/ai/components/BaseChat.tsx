@@ -405,6 +405,9 @@ export const BaseChat = React.forwardRef<HTMLDivElement, BaseChatProps>(
       sendMessage?.({} as React.UIEvent, checklistPrompt);
     };
 
+    const { mode } = useStore(chatStore);
+
+
     const baseChat = (
       <div
         ref={ref}
@@ -466,10 +469,11 @@ export const BaseChat = React.forwardRef<HTMLDivElement, BaseChatProps>(
                   <div
                     style={{ zIndex: '1' }}
                     className={classNames(
-                      `${actionAlert?.type === 'preview' && !isStreaming && 'chat-on-error'} backdrop-blur-[15px] flex flex-col place-items-center align-items-center justify-center rounded-lg relative w-full max-w-chat mx-auto z-prompt base-chat `,
+                      `${actionAlert?.type === 'preview' && !isStreaming && 'chat-on-error'} backdrop-blur-[15px] flex flex-col place-items-center align-items-center justify-center rounded-lg relative w-full max-w-chat mx-auto z-prompt base-chat`,
                       {
                         'sticky bottom-2': chatStarted,
-                      },
+                        'chat-mode': mode === 'chat' // Add the chat-mode class when chat is active
+                      }
                     )}
                   >
                     {/*<div className={'loop-border'}></div>*/}
@@ -523,10 +527,11 @@ export const BaseChat = React.forwardRef<HTMLDivElement, BaseChatProps>(
                       {/* The prompt textarea + send button */}
                       <div
                         className={classNames(
-                          `relative container-chat-bg transition-all ${!showPrompt ? 'show-prompt' : 'hide-prompt'}`,
+                          `relative container-chat-bg transition-all ${!showPrompt ? 'show-prompt' : 'hide-prompt'}`
                         )}
                       >
-                        <div className="flex justify-between items-center top-header-prompt text-sm p-3 shadow-xs border-b border-biela-elements-borderColor max-sm:flex-wrap max-sm:gap-2">
+                        <div
+                          className="flex justify-between items-center top-header-prompt text-sm p-3 shadow-xs border-b border-biela-elements-borderColor max-sm:flex-wrap max-sm:gap-2">
                           <ChatCodeSwitch />
                           <div className={'flex gap-[6px] items-center'}>
                             <WithTooltip tooltip={checkingList ? 'Checking the features' : 'Checklists'}>
@@ -545,7 +550,7 @@ export const BaseChat = React.forwardRef<HTMLDivElement, BaseChatProps>(
                               <WithTooltip tooltip={`${!showPrompt ? 'Hide Prompt' : 'Show Prompt'}`}>
                                 <button
                                   style={{
-                                    backgroundImage: 'linear-gradient(180deg, #010101 57.32%, #161616 100%)',
+                                    backgroundImage: 'linear-gradient(180deg, #010101 57.32%, #161616 100%)'
                                   }}
                                   className="p-[4px] border rounded-full border-[#2E2E2E] flex items-center"
                                   onClick={() => {
@@ -567,7 +572,7 @@ export const BaseChat = React.forwardRef<HTMLDivElement, BaseChatProps>(
                           className={classNames(
                             'w-full p-[24px] outline-none resize-none text-biela-elements-textPrimary placeholder-biela-elements-textTertiary bg-transparent text-sm chat-textarea-font',
                             'transition-all duration-200',
-                            'hover:border-biela-elements-focus',
+                            'hover:border-biela-elements-focus'
                           )}
                           onDragEnter={(e) => {
                             e.preventDefault();
@@ -655,14 +660,15 @@ export const BaseChat = React.forwardRef<HTMLDivElement, BaseChatProps>(
                           onPaste={handlePaste}
                           style={{
                             minHeight: TEXTAREA_MIN_HEIGHT,
-                            maxHeight: TEXTAREA_MAX_HEIGHT,
+                            maxHeight: TEXTAREA_MAX_HEIGHT
                           }}
                           placeholder="If you can imagine it, BIELA can code it, what shall we do today?"
                           translate="no"
                         />
 
                         {/* Footer row under the textarea */}
-                        <div className="flex justify-between items-center text-sm p-3 prompt-actions-button shadow-xs border-t border-biela-elements-borderColor h-[56px]">
+                        <div
+                          className="flex justify-between items-center text-sm p-3 prompt-actions-button shadow-xs border-t border-biela-elements-borderColor h-[56px]">
                           <div className="flex max-sm:gap-[8px] max-sm:w-full gap-3 items-center">
                             <div className={'flex gap-3 items-center'}>
                               <IconButton
