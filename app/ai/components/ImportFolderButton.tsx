@@ -7,7 +7,6 @@ import { logStore } from '~/ai/lib/stores/logs'; // Assuming logStore is importe
 import { useStore } from '@nanostores/react';
 import { chatStore, setProjectImportName } from '../lib/stores/chat';
 
-
 interface ImportFolderButtonProps {
   className?: string;
   importChat?: (description: string, messages: Message[]) => Promise<void>;
