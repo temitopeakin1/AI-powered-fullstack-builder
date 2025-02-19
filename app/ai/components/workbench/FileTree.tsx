@@ -58,26 +58,25 @@ export const FileTree = memo(
       [localFiles, rootFolder, hideRoot, computedHiddenFiles],
     );
 
-    console.log(fileList);
-
     const [collapsedFolders, setCollapsedFolders] = useState(() =>
       collapsed
         ? new Set(fileList.filter((item) => item.kind === 'folder').map((item) => item.fullPath))
         : new Set<string>(),
     );
 
-    // computed(workbenchStore.files, (files) => {
-    //   workbenchStore.setDocuments(files);
-    // });
+    /*
+     * POTENTIAL FIX TO REPLACE RE-RENDERS IN USEEFFECT MADE BY SETDOCUMENTS
+     *  computed(workbenchStore.files, (files) => {
+     *    workbenchStore.setDocuments(files);
+     *  });
+     */
 
     useEffect(() => {
-      console.log('this triggers the override', files);
       workbenchStore.setDocuments(files);
 
       const savedFiles = localStorage.getItem('fileTreeData');
-      console.log({ savedFiles });
       const savedTaskId = localStorage.getItem('currentTaskId');
-      console.log({ savedTaskId });
+
       if (savedTaskId === taskId && savedFiles) {
         setLocalFiles(JSON.parse(savedFiles));
 

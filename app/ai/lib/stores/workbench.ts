@@ -732,11 +732,8 @@ export class WorkbenchStore {
         }),
       );
 
-      console.log({ newFileMap });
-
       this.setDocuments(newFileMap);
-      localStorage.setItem('fileTreeData', JSON.stringify(newFileMap));
-      this.resetAllFileModifications();
+      this.#filesStore.files.set(newFileMap);
 
       // Optionally select the first file, etc.
       const filePaths = Object.keys(newFileMap);
