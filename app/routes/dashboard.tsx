@@ -6,7 +6,7 @@ import { Header } from '~/components/common/Header/Header';
 import ActionCard from '~/components/card/ActionCard';
 import ProjectsSection from '~/backOffice/components/project/ProjectSection';
 import CreateProject from '~/backOffice/components/project/CreateProjectModal';
-import ProjectUpload from '~/backOffice/components/project/ProjectUploadModal';
+import ProjectImport from '~/backOffice/components/project/ProjectImportModal';
 import AddDatabase from '~/backOffice/components/project/AddDatabaseModal';
 import { useUser } from '~/ai/lib/context/userContext';
 
@@ -114,7 +114,7 @@ export default function Dashboard() {
       {modalType === 'import' && (
         <div className="fixed inset-0 flex items-center justify-center z-50">
           <div className="absolute inset-0" onClick={closeModal} />
-          <ProjectUpload closeModal={closeModal} />
+          <ProjectImport closeModal={closeModal} />
         </div>
       )}
       {modalType === 'addDatabase' && (

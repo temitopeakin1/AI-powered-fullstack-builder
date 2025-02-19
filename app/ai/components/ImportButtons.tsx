@@ -2,14 +2,12 @@ import type { Message } from 'ai';
 import { toast } from 'react-toastify';
 import { ImportFolderButton } from '~/ai/components/ImportFolderButton';
 
-
 type ChatData = {
   messages?: Message[]; // Standard biela format
   description?: string; // Optional description
 };
 
 export function ImportButtons(importChat: ((description: string, messages: Message[]) => Promise<void>) | undefined) {
-
   return (
     <div className="flex flex-col items-center justify-center w-auto mb-[10px]">
       <input

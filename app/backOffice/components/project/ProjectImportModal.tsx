@@ -1,11 +1,11 @@
 import { useState } from 'react';
 import { Form } from '@remix-run/react';
 import CloseButton from '../../../components/common/closeButton';
-import { ProjectUploadProps } from '~/backOffice/types/project';
+import { ProjectImportProps } from '~/backOffice/types/project';
 import { ImportFolderButton } from '~/ai/components/ImportFolderButton';
 import { setProjectImportName } from '~/ai/lib/stores/chat';
 
-export default function ProjectUpload({ closeModal}: ProjectUploadProps) {
+export default function ProjectImport({ closeModal}: ProjectImportProps) {
   const [projectNameRef, setProjectNameRef] = useState("");
 
   return (

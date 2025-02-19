@@ -106,7 +106,6 @@ export const ImportFolderButton: React.FC<ImportFolderButtonProps> = ({ classNam
     }
   };
 
-
   return (
     <>
       <input
@@ -121,7 +120,7 @@ export const ImportFolderButton: React.FC<ImportFolderButtonProps> = ({ classNam
       <button
         onClick={() => {
           const input = document.getElementById('folder-import');
-          input?.click()
+          input?.click();
         }}
         className={className}
         disabled={isLoading}
