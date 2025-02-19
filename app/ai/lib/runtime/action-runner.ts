@@ -227,7 +227,7 @@ export class ActionRunner {
 
       this.onAlert?.({
         type: 'error',
-        title: 'Dev Server Failed',
+        title: 'Dev Server Failed2',
         description: error.header,
         content: error.output,
       });
@@ -366,6 +366,7 @@ export class ActionRunner {
 
       const migrationResponse = await response.json();
 
+      logger.error(migrationResponse,'migrationresponse')
 
       if (migrationResponse.success === false) {
 
@@ -373,17 +374,9 @@ export class ActionRunner {
           status: migrationResponse.status,
           error: migrationResponse
         });
-        //
-        // this.onAlert?.({
-        //   type: 'preview',
-        //   title: 'Migration Failed',
-        //   description: migrationResponse.message,
-        //   content: migrationResponse.error,
-        // });
 
-        throw new Error(`Migration API error!`);
+        throw new Error(migrationResponse.error);
       }
-
 
       const result = await response.json();
       logger.info('Migration executed successfully:', result);
@@ -391,6 +384,7 @@ export class ActionRunner {
       return result;
 
     } catch (error) {
+
       logger.error(`Migration failed for user: ${user.id} :`, error);
       throw new ActionCommandError(
         'Failed to execute migration',
