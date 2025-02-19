@@ -35,7 +35,7 @@ const contextMenuVariants = {
   },
 } satisfies Variants;
 
-export const FileBreadcrumb = memo<FileBreadcrumbProps>(({ files, pathSegments = [], onFileSelect }) => {
+export const FileBreadcrumb = memo<FileBreadcrumbProps>(({ pathSegments = [], onFileSelect }) => {
   renderLogger.trace('FileBreadcrumb');
 
   const [activeIndex, setActiveIndex] = useState<number | null>(null);
@@ -65,7 +65,7 @@ export const FileBreadcrumb = memo<FileBreadcrumbProps>(({ files, pathSegments =
     };
   }, [activeIndex]);
 
-  if (files === undefined || pathSegments.length === 0) {
+  if (pathSegments.length === 0) {
     return null;
   }
 
@@ -120,7 +120,6 @@ export const FileBreadcrumb = memo<FileBreadcrumbProps>(({ files, pathSegments =
                         <div className="rounded-lg overflow-hidden">
                           <div className="max-h-[50vh] min-w-[300px] overflow-scroll bg-biela-elements-background-depth-1 border border-biela-elements-borderColor shadow-sm rounded-lg">
                             <FileTree
-                              files={files}
                               hideRoot
                               rootFolder={path}
                               collapsed

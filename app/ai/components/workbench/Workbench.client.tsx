@@ -1,12 +1,8 @@
 import { useStore } from '@nanostores/react';
 import { type HTMLMotionProps, motion, type Variants } from 'framer-motion';
 import { computed } from 'nanostores';
-import { memo, ReactElement, UIEvent, useCallback, useEffect, useMemo, useState } from 'react';
+import { memo, ReactElement, UIEvent, useCallback, useEffect, useState } from 'react';
 import { toast } from 'react-toastify';
-import {
-  type OnChangeCallback as OnEditorChange,
-  type OnScrollCallback as OnEditorScroll,
-} from '~/ai/components/CodeMirrorEditor';
 import { PanelHeaderButton } from '~/ai/components/PanelHeaderButton';
 import { Slider, type SliderOptions } from '~/ai/components/Slider';
 import { workbenchStore, type WorkbenchViewType } from '~/ai/lib/stores/workbench';
@@ -26,17 +22,20 @@ import MobileIcon from '~/assets/icons/mobile';
 import TabletIcon from '~/assets/icons/tablet';
 import GitIcon from '~/assets/icons/git-branch.svg';
 import { useUser } from '~/ai/lib/context/userContext';
-import ConfirmationDialog, { DialogConfirmationType } from '~/ai/components/ConfirmationDialog';
+import ConfirmationDialog, {
+  DialogConfirmationType,
+  emptyConfirmationDialogHandler,
+} from '~/ai/components/ConfirmationDialog';
 import { chatStore, setShowChat } from '~/ai/lib/stores/chat';
 import WithTooltip from '~/ai/components/Tooltip';
-import { uploadProject } from '~/ai/lib/stores/projects/code';
+import { downloadProjectZipBuffer, uploadProject } from '~/ai/lib/stores/projects/code';
 import SaveApp from '~/assets/icons/save-app.svg';
+import RestoreApp from '~/assets/icons/restore-app.svg';
 
 import type { Message } from 'ai';
 
 interface WorkspaceProps {
   chatStarted?: boolean;
-  isStreaming?: boolean;
   messages?: Message[];
 }
 
@@ -77,17 +76,16 @@ const DEVICES = [
   { label: 'Tablet', value: 76.8, id: 'tablet', Icon: <TabletIcon className="w-4 h-4" /> },
 ];
 
-export const Workbench = memo(({ chatStarted, isStreaming }: WorkspaceProps) => {
+export const Workbench = memo(({ chatStarted }: WorkspaceProps) => {
   renderLogger.trace('Workbench');
 
   const navigate = useNavigate();
-  const hasPreview = useStore(computed(workbenchStore.previews, (previews) => previews.length > 0));
+
+  const hasPreview = useStore(computed(workbenchStore.previews, (previews) => !!previews.length));
   const showWorkbench = useStore(workbenchStore.showWorkbench);
-  const selectedFile = useStore(workbenchStore.selectedFile);
-  const currentDocument = useStore(workbenchStore.currentDocument);
-  const unsavedFiles = useStore(workbenchStore.unsavedFiles);
-  const files = useStore(workbenchStore.files);
   const selectedView = useStore(workbenchStore.currentView);
+  const { isStreaming } = chatStore.get();
+
   const [isDeploying, setIsDeploying] = useState(false);
   const [appState, setAppState] = useState<any>(undefined);
   const [deviceMode, setDeviceMode] = useState<(typeof DEVICES)[number]>(DEVICES[0]);
@@ -96,94 +94,53 @@ export const Workbench = memo(({ chatStarted, isStreaming }: WorkspaceProps) => 
     item: { description: string };
   } | null>(null);
   const [isSavingApp, setIsSavingApp] = useState(false);
+  const [isRestoringApp, setIsRestoringApp] = useState(false);
+  const [savedAt, setSavedAt] = useState<Date | null>();
   const { showChat } = useStore(chatStore);
 
   const isSmallViewport = useViewport(1024);
 
   const { isLoggedIn } = useUser();
 
-  const setSelectedView = (view: WorkbenchViewType) => {
-    if (isStreaming) {
-      return;
-    }
-
-    workbenchStore.currentView.set(view);
-  };
-
-  const fetchAppState = async (cached?: boolean) => {
-    const state = await getAppState(cached);
-    setAppState(state);
-  };
+  const setSelectedView = useCallback(
+    (view: WorkbenchViewType) => {
+      if (!isStreaming) {
+        workbenchStore.currentView.set(view);
+      }
+    },
+    [isStreaming],
+  );
 
   useEffect(() => {
-    fetchAppState().then();
-  }, []);
-
-  useEffect(() => {
-    // deployment finished, fetch app state
-    if (!isDeploying) {
-      fetchAppState(true).then();
-    }
-  }, [isDeploying]);
-
-  useMemo(() => {
     if (!hasPreview) {
       return;
     }
 
     setSelectedView('preview');
-  }, [hasPreview]);
+  }, [hasPreview, setSelectedView]);
 
-  useMemo(() => {
-    workbenchStore.setDocuments(files);
-  }, [files]);
+  const fetchAppState = useCallback(async (cached?: boolean) => {
+    const state = await getAppState(cached);
 
-  const onEditorChange = useCallback<OnEditorChange>(
-    (update) => {
-      if (isStreaming) {
-        return;
-      }
+    setSavedAt(state?.userProject?.updated_at);
+    setAppState(state);
+  }, []);
 
-      workbenchStore.setCurrentDocumentContent(update.content);
-    },
-    [isStreaming],
-  );
+  useEffect(() => {
+    (async () => {
+      await fetchAppState();
+    })();
+  }, []);
 
-  const onEditorScroll = useCallback<OnEditorScroll>(
-    (position) => {
-      workbenchStore.setCurrentDocumentScrollPosition(position);
-    },
-    [isStreaming],
-  );
-
-  const onFileSelect = useCallback(
-    (filePath: string | undefined) => {
-      if (isStreaming) {
-        return;
-      }
-
-      workbenchStore.setSelectedFile(filePath);
-    },
-    [isStreaming],
-  );
-
-  const onFileSave = useCallback(() => {
-    if (isStreaming) {
+  useEffect(() => {
+    if (isDeploying) {
       return;
     }
 
-    workbenchStore.saveCurrentDocument().catch(() => {
-      toast.error('Failed to update file content');
-    });
-  }, [isStreaming]);
-
-  const onFileReset = useCallback(() => {
-    if (isStreaming) {
-      return;
-    }
-
-    workbenchStore.resetCurrentDocument();
-  }, [isStreaming]);
+    (async () => {
+      await fetchAppState(true);
+    })();
+  }, [isDeploying]);
 
   const handleFork = async () => {
     if (isStreaming) {
@@ -210,7 +167,26 @@ export const Workbench = memo(({ chatStarted, isStreaming }: WorkspaceProps) => 
 
   const handleSaveAppClick = async (event: UIEvent) => {
     event.preventDefault();
+
+    if (!isLoggedIn()) {
+      goToSignIn();
+
+      return;
+    }
+
     setDialogContent({ type: DialogConfirmationType.SAVE, item: { description: 'this app' } });
+  };
+
+  const handleRestoreAppClick = async (event: UIEvent) => {
+    event.preventDefault();
+
+    if (!isLoggedIn()) {
+      goToSignIn();
+
+      return;
+    }
+
+    setDialogContent({ type: DialogConfirmationType.RESTORE, item: { description: 'a previous app version' } });
   };
 
   const handleSaveApp = async () => {
@@ -221,11 +197,32 @@ export const Workbench = memo(({ chatStarted, isStreaming }: WorkspaceProps) => 
     setIsSavingApp(true);
 
     try {
-      await uploadProject();
+      const project = await uploadProject();
+      setSavedAt(project?.updated_at);
     } catch (error) {
       console.error('Failed saving app:', error);
     } finally {
       setIsSavingApp(false);
+    }
+  };
+
+  const handleRestoreApp = async () => {
+    if (isRestoringApp || isStreaming || !savedAt) {
+      return;
+    }
+
+    setIsRestoringApp(true);
+
+    try {
+      const zipArrayBuffer = await downloadProjectZipBuffer();
+      await workbenchStore.loadProjectFromZipBuffer(zipArrayBuffer as ArrayBuffer);
+      workbenchStore.restartBielaTerminalServer().then();
+
+      setIsRestoringApp(false);
+    } catch (error) {
+      console.error('Failed saving app:', error);
+    } finally {
+      setIsRestoringApp(false);
     }
   };
 
@@ -317,7 +314,25 @@ export const Workbench = memo(({ chatStarted, isStreaming }: WorkspaceProps) => 
                   {selectedView === 'code' && (
                     <div className="flex overflow-y-auto">
                       <div className="flex gap-1">
-                        <button onClick={handleSaveAppClick} key="i-ph:save-app" className={'download-btn'}>
+                        <WithTooltip
+                          tooltip={
+                            savedAt ? (
+                              <div className={'flex flex-col'}>
+                                <span>Lastly saved at:</span>
+                                <span>{new Date(savedAt).toLocaleString()}</span>
+                              </div>
+                            ) : (
+                              <span>There's no saved app version.</span>
+                            )
+                          }
+                          position={'bottom'}
+                        >
+                          <button onClick={handleRestoreAppClick} className={'download-btn'} disabled={!savedAt}>
+                            <img src={RestoreApp} alt="Restore App" />
+                            Restore App
+                          </button>
+                        </WithTooltip>
+                        <button onClick={handleSaveAppClick} className={'download-btn'}>
                           <img src={SaveApp} alt="Save App" />
                           Save App
                         </button>
@@ -372,18 +387,7 @@ export const Workbench = memo(({ chatStarted, isStreaming }: WorkspaceProps) => 
                   initial={{ x: selectedView === 'code' ? 0 : '-100%' }}
                   animate={{ x: selectedView === 'code' ? 0 : '-100%' }}
                 >
-                  <EditorPanel
-                    editorDocument={currentDocument}
-                    isStreaming={isStreaming}
-                    selectedFile={selectedFile}
-                    files={files}
-                    unsavedFiles={unsavedFiles}
-                    onFileSelect={onFileSelect}
-                    onEditorScroll={onEditorScroll}
-                    onEditorChange={onEditorChange}
-                    onFileSave={onFileSave}
-                    onFileReset={onFileReset}
-                  />
+                  <EditorPanel />
                 </View>
                 <View
                   initial={{ x: selectedView === 'preview' ? 0 : '100%' }}
@@ -401,13 +405,17 @@ export const Workbench = memo(({ chatStarted, isStreaming }: WorkspaceProps) => 
           isOpen={dialogContent !== null}
           type={dialogContent?.type ?? DialogConfirmationType.FORK}
           description={dialogContent?.item.description ?? ''}
+          isLoading={isSavingApp || isRestoringApp}
           onConfirm={async () => {
-            if (dialogContent?.type === DialogConfirmationType.FORK) {
-              await handleFork();
-            }
+            const handler = {
+              ...emptyConfirmationDialogHandler,
+              [DialogConfirmationType.FORK]: () => handleFork(),
+              [DialogConfirmationType.SAVE]: () => handleSaveApp(),
+              [DialogConfirmationType.RESTORE]: () => handleRestoreApp(),
+            };
 
-            if (dialogContent?.type === DialogConfirmationType.SAVE) {
-              await handleSaveApp();
+            if (dialogContent?.type) {
+              await handler[dialogContent.type]();
             }
 
             closeDialog();

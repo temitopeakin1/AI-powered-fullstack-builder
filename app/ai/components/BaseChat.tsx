@@ -35,8 +35,6 @@ import ChatSuggestion from '~/ai/components/ChatSuggestion';
 import CheckList from '~/assets/icons/checkList';
 import { chatStore, setCheckingList, setCleaningProject, setShowPrompt } from '~/ai/lib/stores/chat';
 import { useStore } from '@nanostores/react';
-import { createScopedLogger } from '~/utils/logger';
-import CleanUpIcon from '~/assets/icons/refresh.svg';
 import { useParams } from '@remix-run/react';
 
 const TEXTAREA_MIN_HEIGHT = 76;
@@ -475,7 +473,6 @@ export const BaseChat = React.forwardRef<HTMLDivElement, BaseChatProps>(
                     {/*<div className={'loop-border'}></div>*/}
                     {chatStarted && <TokenRemaining isStreaming={isStreaming} />}
                     <div className={classNames(styles.containerUnitTesting, 'w-full')}>
-
                       {actionAlert?.type === 'preview' && !isStreaming && (
                         <ChatAlert
                           alert={actionAlert}
@@ -756,7 +753,7 @@ export const BaseChat = React.forwardRef<HTMLDivElement, BaseChatProps>(
           </div>
 
           {/* @ts-ignore */}
-          <ClientOnly>{() => <Workbench chatStarted={chatStarted} isStreaming={isStreaming} />}</ClientOnly>
+          <ClientOnly>{() => <Workbench chatStarted={chatStarted} />}</ClientOnly>
         </div>
       </div>
     );

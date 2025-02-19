@@ -5,7 +5,7 @@
 import { useStore } from '@nanostores/react';
 import type { JSONValue, Message } from 'ai';
 import { useChat } from 'ai/react';
-import React, { memo, UIEvent, useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import React, { memo, UIEvent, useCallback, useEffect, useRef, useState } from 'react';
 import { useAnimate } from 'framer-motion';
 import { cssTransition, toast, ToastContainer } from 'react-toastify';
 import { useSettings } from '~/ai/lib/hooks/useSettings';
@@ -275,7 +275,7 @@ export const ChatImpl = memo(
     const [fakeLoading, setFakeLoading] = useState(false);
     const files = useStore(workbenchStore.files);
     const actionAlert = useStore(workbenchStore.alert);
-    const { promptId, autoSelectTemplate, contextOptimizationEnabled } = useSettings();
+    const { autoSelectTemplate, contextOptimizationEnabled } = useSettings();
     const { showChat } = useStore(chatStore);
     const [animationScope, animate] = useAnimate();
     const [apiKeys, setApiKeys] = useState<Record<string, string>>({});
@@ -366,7 +366,7 @@ export const ChatImpl = memo(
         [] as { role: string; id: string; content: string | { type: string; text: string }[] }[],
       );
 
-    useMemo(() => {
+    useEffect(() => {
       if (initialMessages.length === messages.length) {
         return;
       }
@@ -409,7 +409,7 @@ export const ChatImpl = memo(
       setApiKeys(JSON.parse(storedApiKeys));
     }, []);
 
-    useMemo(() => {
+    useEffect(() => {
       setIsStreaming(isLoading);
     }, [isLoading]);
 
@@ -423,7 +423,7 @@ export const ChatImpl = memo(
       });
     }, [JSON.stringify(messages), isLoading, parseMessages]);
 
-    useMemo(() => {
+    useEffect(() => {
       const textarea = textareaRef.current;
 
       if (textarea) {

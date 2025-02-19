@@ -1,5 +1,13 @@
 import { backendApiFetch } from '~/ai/lib/backend-api';
-import { workbenchStore } from '../workbench';
+import { workbenchStore } from '~/ai/lib/stores/workbench';
+
+export interface Project {
+  created_at: string;
+  projectSlug: string;
+  updated_at: Date;
+  userId: string;
+  _id: string;
+}
 
 export async function uploadProject() {
   try {
@@ -15,9 +23,9 @@ export async function uploadProject() {
       body: formData,
     });
 
-    return await response.json();
+    return (await response.json()) as Project;
   } catch (error) {
-    console.error('Error deploying project:', error instanceof Error ? error.message : String(error));
+    console.error('Error saving project:', error instanceof Error ? error.message : String(error));
     return null;
   }
 }
@@ -32,10 +40,11 @@ export async function downloadProjectZipBuffer() {
       method: 'GET',
     });
 
-    const json = await response.json();
+    const json = (await response.json()) as { data: ArrayBuffer };
 
-    return new Uint8Array(json?.data);
+    return json?.data;
   } catch (error) {
     console.error('Error deploying project:', error instanceof Error ? error.message : String(error));
+    return null;
   }
 }

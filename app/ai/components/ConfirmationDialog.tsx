@@ -1,6 +1,7 @@
 import { FC, UIEvent } from 'react';
 import { Dialog, DialogButton, DialogDescription, DialogRoot, DialogTitle } from './Dialog';
 import { capitalize } from 'lodash';
+import { LoadingOverlay } from '~/ai/components/LoadingOverlay';
 
 export enum DialogConfirmationType {
   DELETE = 'delete',
@@ -10,6 +11,7 @@ export enum DialogConfirmationType {
   FORK = 'form',
   ROLLBACK = 'rollback',
   SAVE = 'save',
+  RESTORE = 'restore',
 }
 
 interface ConfirmationDialogProps {
@@ -18,9 +20,21 @@ interface ConfirmationDialogProps {
   description: string;
   onConfirm: (event: UIEvent) => Promise<void> | void;
   onCancel: () => void;
+  isLoading?: boolean;
 }
 
-const ConfirmationDialog: FC<ConfirmationDialogProps> = ({ isOpen, type, description, onConfirm, onCancel }) => {
+export const emptyConfirmationDialogHandler = Object.fromEntries(
+  Object.values(DialogConfirmationType).map((type) => [type, () => {}]),
+) as Record<DialogConfirmationType, () => void>;
+
+const ConfirmationDialog: FC<ConfirmationDialogProps> = ({
+  isOpen,
+  type,
+  description,
+  onConfirm,
+  onCancel,
+  isLoading,
+}) => {
   const chatTypes = [DialogConfirmationType.FORK, DialogConfirmationType.DELETE, DialogConfirmationType.SAVE];
 
   return (
@@ -41,8 +55,15 @@ const ConfirmationDialog: FC<ConfirmationDialogProps> = ({ isOpen, type, descrip
           <DialogButton type="secondary" onClick={onCancel}>
             Cancel
           </DialogButton>
-          <DialogButton type="danger" onClick={onConfirm}>
-            {capitalize(type)}
+          <DialogButton type="danger" disabled={isLoading} onClick={onConfirm}>
+            <>
+              {capitalize(type)}
+              {isLoading && (
+                <LoadingOverlay
+                  message={`Please wait while we ${type} the ${chatTypes.includes(type) ? 'chat' : 'messages'}.`}
+                />
+              )}
+            </>
           </DialogButton>
         </div>
       </Dialog>

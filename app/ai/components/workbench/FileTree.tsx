@@ -3,6 +3,8 @@ import type { FileMap } from '~/ai/lib/stores/files';
 import { classNames } from '~/utils/classNames';
 import { createScopedLogger, renderLogger } from '~/utils/logger';
 import * as ContextMenu from '@radix-ui/react-context-menu';
+import { useStore } from '@nanostores/react';
+import { workbenchStore } from '~/ai/lib/stores/workbench';
 
 const logger = createScopedLogger('FileTree');
 
@@ -26,7 +28,6 @@ interface Props {
 
 export const FileTree = memo(
   ({
-    files = {},
     onFileSelect,
     selectedFile,
     rootFolder,
@@ -41,6 +42,7 @@ export const FileTree = memo(
   }: Props) => {
     renderLogger.trace('FileTree');
 
+    const files = useStore(workbenchStore.files);
     const [newFileName, setNewFileName] = useState('');
     const [localFiles, setLocalFiles] = useState<FileMap>(files || {});
     const [activeFolderInput, setActiveFolderInput] = useState<string | null>(null);
@@ -51,61 +53,78 @@ export const FileTree = memo(
 
     const computedHiddenFiles = useMemo(() => [...DEFAULT_HIDDEN_FILES, ...(hiddenFiles ?? [])], [hiddenFiles]);
 
-    const fileList = useMemo(() => {
-      return buildFileList(localFiles, rootFolder, hideRoot, computedHiddenFiles);
-    }, [localFiles, rootFolder, hideRoot, computedHiddenFiles]);
+    const fileList = useMemo(
+      () => buildFileList(localFiles, rootFolder, hideRoot, computedHiddenFiles),
+      [localFiles, rootFolder, hideRoot, computedHiddenFiles],
+    );
 
-    const [collapsedFolders, setCollapsedFolders] = useState(() => {
-      return collapsed
+    console.log(fileList);
+
+    const [collapsedFolders, setCollapsedFolders] = useState(() =>
+      collapsed
         ? new Set(fileList.filter((item) => item.kind === 'folder').map((item) => item.fullPath))
-        : new Set<string>();
-    });
+        : new Set<string>(),
+    );
+
+    // computed(workbenchStore.files, (files) => {
+    //   workbenchStore.setDocuments(files);
+    // });
 
     useEffect(() => {
-      const savedFiles = localStorage.getItem('fileTreeData');
-      const savedTaskId = localStorage.getItem('currentTaskId');
+      console.log('this triggers the override', files);
+      workbenchStore.setDocuments(files);
 
+      const savedFiles = localStorage.getItem('fileTreeData');
+      console.log({ savedFiles });
+      const savedTaskId = localStorage.getItem('currentTaskId');
+      console.log({ savedTaskId });
       if (savedTaskId === taskId && savedFiles) {
         setLocalFiles(JSON.parse(savedFiles));
-      } else {
-        // Reset to initial files for a new task
-        setLocalFiles(files);
-        localStorage.setItem('currentTaskId', taskId || '');
 
-        try {
-          localStorage.setItem('fileTreeData', JSON.stringify(files));
-        } catch (error) {
-          console.error('Error saving file tree data to localStorage:', error);
-        }
+        return;
+      }
+
+      // Reset to initial files for a new task
+      setLocalFiles(files);
+      localStorage.setItem('currentTaskId', taskId || '');
+
+      try {
+        localStorage.setItem('fileTreeData', JSON.stringify(files));
+      } catch (error) {
+        console.error('Error saving file tree data to localStorage:', error);
       }
     }, [taskId, files]);
 
     useEffect(() => {
-      if (Object.keys(localFiles).length > 0) {
-        try {
-          localStorage.setItem('fileTreeData', JSON.stringify(localFiles));
-        } catch (error) {
-          console.error('Error saving file tree data to localStorage:', error);
-        }
+      if (!Object.keys(localFiles).length) {
+        return;
+      }
+
+      try {
+        localStorage.setItem('fileTreeData', JSON.stringify(localFiles));
+      } catch (error) {
+        console.error('Error saving file tree data to localStorage:', error);
       }
     }, [localFiles]);
 
     useEffect(() => {
       if (collapsed) {
         setCollapsedFolders(new Set(fileList.filter((item) => item.kind === 'folder').map((item) => item.fullPath)));
-      } else {
-        setCollapsedFolders((prevCollapsed) => {
-          const newCollapsed = new Set<string>();
 
-          for (const folder of fileList) {
-            if (folder.kind === 'folder' && prevCollapsed.has(folder.fullPath)) {
-              newCollapsed.add(folder.fullPath);
-            }
-          }
-
-          return newCollapsed;
-        });
+        return;
       }
+
+      setCollapsedFolders((prevCollapsed) => {
+        const newCollapsed = new Set<string>();
+
+        for (const folder of fileList) {
+          if (folder.kind === 'folder' && prevCollapsed.has(folder.fullPath)) {
+            newCollapsed.add(folder.fullPath);
+          }
+        }
+
+        return newCollapsed;
+      });
     }, [fileList, collapsed]);
 
     const filteredFileList = useMemo(() => {
