@@ -128,7 +128,7 @@ function AppContent() {
         return;
       }
 
-      if (code.includes('-')) {
+      if (code.includes('-') && !state) {
         return
       }
 
