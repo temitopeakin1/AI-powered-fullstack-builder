@@ -38,6 +38,7 @@ import { useStore } from '@nanostores/react';
 import { createScopedLogger } from '~/utils/logger';
 import CleanUpIcon from '~/assets/icons/refresh.svg';
 import { useParams } from '@remix-run/react';
+import {backendApiFetch} from "~/ai/lib/backend-api";
 
 const TEXTAREA_MIN_HEIGHT = 76;
 
@@ -110,6 +111,25 @@ export const BaseChat = React.forwardRef<HTMLDivElement, BaseChatProps>(
         localStorage.setItem('chatId', chatId);
       }
     }, [chatId]);
+
+    const abort = async () => {
+      if (isStreaming) {
+        try {
+          await backendApiFetch('/ai/abort', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+          });
+
+          handleStop?.();
+
+        } catch (error) {
+          logger.error('Error during abort:', error);
+          handleStop?.();
+        }
+      }
+    };
     /**
      * Keep an eye on transcript changes for debugging
      */
@@ -742,7 +762,7 @@ export const BaseChat = React.forwardRef<HTMLDivElement, BaseChatProps>(
                                 disabled={isStreaming}
                                 onClick={(event) => {
                                   if (isStreaming) {
-                                    handleStop?.();
+                                    abort();
                                     return;
                                   }
 
