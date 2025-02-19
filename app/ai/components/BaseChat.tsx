@@ -410,9 +410,6 @@ export const BaseChat = React.forwardRef<HTMLDivElement, BaseChatProps>(
       sendMessage?.({} as React.UIEvent, checklistPrompt);
     };
 
-    console.log(actionAlert,'actionAlert')
-    console.log(isStreaming,'isStreaming')
-
     const baseChat = (
       <div
         ref={ref}
@@ -474,7 +471,7 @@ export const BaseChat = React.forwardRef<HTMLDivElement, BaseChatProps>(
                   <div
                     style={{ zIndex: '1' }}
                     className={classNames(
-                      `${actionAlert?.type === 'preview'  && 'chat-on-error'} backdrop-blur-[15px] flex flex-col place-items-center align-items-center justify-center rounded-lg relative w-full max-w-chat mx-auto z-prompt base-chat `,
+                      `${(actionAlert?.type === 'preview' || actionAlert?.type === 'migration')  && 'chat-on-error'} backdrop-blur-[15px] flex flex-col place-items-center align-items-center justify-center rounded-lg relative w-full max-w-chat mx-auto z-prompt base-chat `,
                       {
                         'sticky bottom-2': chatStarted,
                       },
@@ -484,7 +481,8 @@ export const BaseChat = React.forwardRef<HTMLDivElement, BaseChatProps>(
                     {chatStarted && <TokenRemaining isStreaming={isStreaming} />}
                     <div className={classNames(styles.containerUnitTesting, 'w-full')}>
 
-                      {actionAlert?.type === 'preview' && !isStreaming && (
+                      {((actionAlert?.type === 'error' && isStreaming) ||
+                        (actionAlert?.type === 'migration')) && (
                         <ChatAlert
                           alert={actionAlert}
                           clearAlert={() => clearAlert?.()}

@@ -192,12 +192,15 @@ export class ActionRunner {
                 return;
               }
 
-              this.onAlert?.({
-                type: 'error',
-                title: 'Dev Server Failed',
-                description: err.header,
-                content: err.output,
-              });
+
+                this.onAlert?.({
+                  type: 'error',
+                  title: 'Dev Server Failed',
+                  description: err.header,
+                  content: err.output,
+
+              })
+
             });
 
           /*
@@ -225,12 +228,15 @@ export class ActionRunner {
         return;
       }
 
-      this.onAlert?.({
-        type: 'error',
-        title: 'Dev Server Failed2',
-        description: error.header,
-        content: error.output,
-      });
+      if (action.type !==  'migration') {
+
+        this.onAlert?.({
+          type: 'error',
+          title: 'Dev Server Failed',
+          description: error.header,
+          content: error.output,
+        });
+      }
 
       // re-throw the error to be caught in the promise chain
       throw error;
@@ -366,29 +372,30 @@ export class ActionRunner {
 
       const migrationResponse = await response.json();
 
-      logger.error(migrationResponse,'migrationresponse')
 
       if (migrationResponse.success === false) {
 
-        logger.error('Migration API error', {
-          status: migrationResponse.status,
-          error: migrationResponse
+        this.onAlert?.({
+          type: 'migration',
+          title: 'Migration Failed',
+          description: migrationResponse.message,
+          content: migrationResponse.error,
+          source:'preview',
         });
 
-        throw new Error(migrationResponse.error);
+        throw new Error(migrationResponse.message);
       }
 
-      const result = await response.json();
-      logger.info('Migration executed successfully:', result);
+      logger.info('Migration executed successfully:', migrationResponse);
 
-      return result;
+      return migrationResponse;
 
     } catch (error) {
 
       logger.error(`Migration failed for user: ${user.id} :`, error);
       throw new ActionCommandError(
         'Failed to execute migration',
-        error.message
+        ''
       );
     }
   }
