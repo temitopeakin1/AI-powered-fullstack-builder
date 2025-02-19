@@ -133,6 +133,7 @@ export function HistoryItem({ item, onDelete, onDuplicate, exportChat, downloadP
                 className="w-[260px] font-light text-left  block mask-[linear-gradient(to_right,_black_80%,_transparent_100%)]"
               >
                 {currentDescription}
+                <p className="text-xs text-gray-400">Last Updated: {new Intl.DateTimeFormat("en-US", { month: "short", day: "numeric", year: "numeric" }).format(new Date(item.timestamp))}</p>
               </p>
               <div
                 className={classNames(
