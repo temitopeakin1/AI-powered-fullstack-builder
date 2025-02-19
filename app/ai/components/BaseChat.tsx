@@ -104,6 +104,51 @@ export const BaseChat = React.forwardRef<HTMLDivElement, BaseChatProps>(
     const [transcript, setTranscript] = useState('');
     const { showPrompt, checkingList, cleaningProject } = useStore(chatStore);
     const { chatId } = useParams();
+    const [rotation, setRotation] = useState(0);
+
+    useEffect(() => {
+      let active = true;
+      // Pornim animația de la starea curentă a rotației
+      let angle = rotation;
+      const step = 1;
+      const duration = 5000;
+      const interval = duration / 360;
+
+      function updateRotation() {
+        if (!active) return;
+        // Incrementăm unghiul și îl normalizăm la [0, 360)
+        angle = (angle + step) % 360;
+        setRotation(angle);
+
+        // Dacă streaming-ul este activ, continuăm animația.
+        // Dacă nu, mai continuăm doar până când unghiul revine la 0.
+        if (isStreaming || angle !== 0) {
+          setTimeout(() => {
+            requestAnimationFrame(() => {
+              if (active) {
+                updateRotation();
+              }
+            });
+          }, interval);
+        } else {
+          // Când animația s-a terminat (angle a revenit la 0), oprim animația.
+          setRotation(0);
+        }
+      }
+
+      // Pornim animația dacă:
+      // - streaming-ul e activ, sau
+      // - streaming-ul a devenit false, dar animația nu s-a terminat încă (rotation !== 0)
+      if (isStreaming || rotation !== 0) {
+        updateRotation();
+      }
+
+      // Cleanup: oprim orice actualizare ulterioară când componenta se demontează sau când 'isStreaming' se schimbă
+      return () => {
+        active = false;
+      };
+    }, [isStreaming]);
+
 
     useEffect(() => {
       if (chatId) {
@@ -412,7 +457,6 @@ export const BaseChat = React.forwardRef<HTMLDivElement, BaseChatProps>(
         ? "If you can imagine it, BIELA can code it, what shall we do today?"
         : "How can I help you today? Let’s do something amazing together";
 
-
     const baseChat = (
       <div
         ref={ref}
@@ -472,9 +516,9 @@ export const BaseChat = React.forwardRef<HTMLDivElement, BaseChatProps>(
               <ClientOnly>
                 {() => (
                   <div
-                    style={{ zIndex: '1' }}
+                    style={{ zIndex: '1', '--rotaion-variable': `${rotation}deg` }}
                     className={classNames(
-                      `${actionAlert?.type === 'preview' && !isStreaming && 'chat-on-error'} backdrop-blur-[15px] flex flex-col place-items-center align-items-center justify-center rounded-lg relative w-full max-w-chat mx-auto z-prompt base-chat`,
+                      `${actionAlert?.type === 'preview' && !isStreaming && 'chat-on-error'} backdrop-blur-[15px] transition-all flex flex-col place-items-center align-items-center justify-center rounded-lg relative w-full max-w-chat mx-auto z-prompt base-chat`,
                       {
                         'sticky bottom-2': chatStarted,
                         'chat-mode': mode === 'chat' // Add the chat-mode class when chat is active
