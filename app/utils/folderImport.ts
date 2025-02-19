@@ -53,7 +53,12 @@ ${file.content}
   const userMessage: Message = {
     role: 'user',
     id: generateId(),
-    content: `Import the "${folderName}" folder`,
+    content: [
+      {
+        type: 'text',
+        text: `Import the "${folderName}" folder`,
+      },
+    ] as any, // Type assertion to bypass compiler check
     createdAt: new Date(),
   };
 
