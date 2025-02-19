@@ -14,7 +14,6 @@ export default function ProjectImport({ closeModal}: ProjectImportProps) {
         <div className="flex justify-between items-center -mt-1 -md:mt-2 ">
           <div className="flex flex-col gap-1">
             <span className="font-inter text-lg text-white font-medium leading-relaxed">Upload Project</span>
-            <h3 className="text-xs text-[#777777] leading-relaxed">Give a subtitle</h3>
           </div>
           <CloseButton closeModal={closeModal} />
         </div>
@@ -22,12 +21,6 @@ export default function ProjectImport({ closeModal}: ProjectImportProps) {
           <div className="flex flex-col items-center mt-1 gap-4">
             <Form method="post" action="post" className="flex flex-col gap-3 items-center rounded-[8px] p-3 ">
               <div className="relative w-[456px] h-[73px]">
-                <label
-                  htmlFor="title"
-                  className="absolute left-4 top-4.5 transform -translate-y-1/2 text-[#777777] text-xs transition-all duration-300 ease-in-out group-focus-within:text-white group-focus-within:top-2 group-focus-within:text-[12px]"
-                >
-                  Select
-                </label>
                 <input
                   type="text"
                   name="title"
@@ -37,7 +30,7 @@ export default function ProjectImport({ closeModal}: ProjectImportProps) {
                   onChange={(e) => {
                     setProjectImportName(e.target.value)
                     setProjectNameRef(e.target.value)}}
-                  className="w-full h-full bg-transparent font-inter text-white placeholder-white bg-[linear-gradient(0deg,_rgba(0,_0,_0,_0.048)_0%,_rgba(31,_31,_31,_0.8)_100%)] border border-[#2E2E2E] border-image-slice-1 backdrop-[blur(50px)] rounded-md focus:outline-none px-4 text-base pt-5 group"
+                  className="w-full h-full bg-transparent font-inter text-white placeholder-white bg-[linear-gradient(0deg,_rgba(0,_0,_0,_0.048)_0%,_rgba(31,_31,_31,_0.8)_100%)] border border-[#2E2E2E] border-image-slice-1 backdrop-[blur(50px)] rounded-md focus:outline-none px-4 text-base group"
                 />
               </div>
             </Form>
