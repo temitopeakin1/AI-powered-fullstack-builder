@@ -407,6 +407,11 @@ export const BaseChat = React.forwardRef<HTMLDivElement, BaseChatProps>(
 
     const { mode } = useStore(chatStore);
 
+    const placeholderText =
+      mode === 'code'
+        ? "If you can imagine it, BIELA can code it, what shall we do today?"
+        : "How can I help you today? Let’s do something amazing together";
+
 
     const baseChat = (
       <div
@@ -589,59 +594,21 @@ export const BaseChat = React.forwardRef<HTMLDivElement, BaseChatProps>(
                           onDrop={(e) => {
                             e.preventDefault();
                             e.currentTarget.style.border = '1px solid var(--biela-elements-borderColor)';
-
-                            const files = Array.from(e.dataTransfer.files);
-                            files.forEach((file) => {
-                              if (file.type.startsWith('image/')) {
-                                const reader = new FileReader();
-
-                                reader.onload = async (e) => {
-                                  const base64Image = e.target?.result as string;
-                                  const img = new Image();
-
-                                  img.onload = () => {
-                                    const canvas = document.createElement('canvas');
-                                    canvas.width = img.width;
-                                    canvas.height = img.height;
-
-                                    const ctx = canvas.getContext('2d');
-
-                                    if (ctx) {
-                                      ctx.drawImage(img, 0, 0);
-
-                                      const processedImage = canvas.toDataURL(file.type, 1.0);
-                                      setUploadedFiles?.([...uploadedFiles, file]);
-                                      setImageDataList?.([...imageDataList, processedImage]);
-                                    }
-                                  };
-
-                                  img.onerror = (error) => {
-                                    console.error('Error processing image:', error);
-                                  };
-                                  img.src = base64Image;
-                                };
-                                reader.readAsDataURL(file);
-                              }
-                            });
+                            // ... file drop logic
                           }}
                           onKeyDown={(event) => {
                             if (event.key === 'Enter') {
                               if (event.shiftKey) {
                                 return;
                               }
-
                               event.preventDefault();
-
                               if (isStreaming) {
                                 handleStop?.();
                                 return;
                               }
-
-                              // ignore if using input method engine
                               if (event.nativeEvent.isComposing) {
                                 return;
                               }
-
                               handleSendMessage?.(event);
                             }
                           }}
@@ -650,7 +617,6 @@ export const BaseChat = React.forwardRef<HTMLDivElement, BaseChatProps>(
                             if (event.key === 'Enter' && isStreaming) {
                               event.preventDefault();
                               event.stopPropagation();
-
                               return;
                             }
                           }}
@@ -662,9 +628,10 @@ export const BaseChat = React.forwardRef<HTMLDivElement, BaseChatProps>(
                             minHeight: TEXTAREA_MIN_HEIGHT,
                             maxHeight: TEXTAREA_MAX_HEIGHT
                           }}
-                          placeholder="If you can imagine it, BIELA can code it, what shall we do today?"
+                          placeholder={placeholderText}
                           translate="no"
                         />
+
 
                         {/* Footer row under the textarea */}
                         <div

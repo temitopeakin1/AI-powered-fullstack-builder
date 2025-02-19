@@ -73,7 +73,7 @@ const ChatCodeSliderButton = memo(({
   // Use purple (#800080) for chat when selected; keep green (#86F49C) for code.
   const selectedClasses =
     variant === 'chat'
-      ? 'text-[#010101] bg-[#800080]'
+      ? 'text-white bg-[#800080]'
       : 'text-[#010101] bg-[#86F49C]';
   const notSelectedClasses = 'text-biela-elements-item-contentActive bg-transparent';
 
