@@ -5,7 +5,7 @@
 import { useStore } from '@nanostores/react';
 import type { JSONValue, Message } from 'ai';
 import { useChat } from 'ai/react';
-import React, { memo, UIEvent, useCallback, useEffect, useRef, useState } from 'react';
+import React, { memo, UIEvent, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useAnimate } from 'framer-motion';
 import { cssTransition, toast, ToastContainer } from 'react-toastify';
 import { useSettings } from '~/ai/lib/hooks/useSettings';
@@ -409,11 +409,9 @@ export const ChatImpl = memo(
       setApiKeys(JSON.parse(storedApiKeys));
     }, []);
 
-    useEffect(() => {
+    useMemo(() => {
       setIsStreaming(isLoading);
-    }, [isLoading]);
 
-    useEffect(() => {
       processSampledMessages({
         messages,
         initialMessages,

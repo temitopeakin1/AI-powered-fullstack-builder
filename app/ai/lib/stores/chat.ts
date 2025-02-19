@@ -35,7 +35,6 @@ export function setCheckingList(checkingList: boolean) {
 export function setCleaningProject(cleaningProject: boolean) {
   chatStore.setKey('cleaningProject', cleaningProject);
 }
-export function setErrorDetails(errorDetails: false | true) {
+export function setErrorDetails(errorDetails: boolean) {
   chatStore.setKey('errorDetails', errorDetails);
 }
-

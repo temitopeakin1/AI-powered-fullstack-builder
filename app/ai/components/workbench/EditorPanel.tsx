@@ -137,7 +137,6 @@ export const EditorPanel = memo(() => {
               <FileTree
                 className="h-full"
                 hideRoot
-                unsavedFiles={unsavedFiles}
                 rootFolder={WORK_DIR}
                 selectedFile={selectedFile}
                 onFileSelect={handleFileSelect}

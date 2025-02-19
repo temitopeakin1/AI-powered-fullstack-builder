@@ -21,6 +21,7 @@ import { createSampler } from '~/utils/sampler';
 import type { ActionAlert } from '~/types/actions';
 import { UserStore } from '~/ai/lib/stores/user/userStore';
 import { WORK_DIR } from '~/utils/constants';
+import ignore from 'ignore';
 
 export interface ArtifactState {
   id: string;
@@ -715,15 +716,27 @@ export class WorkbenchStore {
       const zip = await JSZip.loadAsync(typedArray);
 
       const newFileMap: FileMap = {};
+      const ignorePatterns = [
+        'dist/**',
+        'build/**',
+        'node_modules/**',
+        '.git/**',
+        '.github/**',
+        '**/*lock.json',
+        '**/*lock.yaml',
+      ];
+
+      const ig = ignore().add(ignorePatterns);
 
       // Iterate over all files in the archive
       await Promise.all(
         Object.keys(zip.files).map(async (relativePath) => {
           const fileEntry = zip.files[relativePath];
 
-          if (!fileEntry.dir && !fileEntry.name.startsWith('.git') && fileEntry.name !== 'package-lock.json') {
+          if (!fileEntry.dir && !ig.ignores(relativePath)) {
             const content = await fileEntry.async('string');
-            newFileMap[`${WORK_DIR}/` + relativePath] = {
+
+            newFileMap[`${WORK_DIR}/${relativePath}`] = {
               type: 'file',
               isBinary: false,
               content,
@@ -732,11 +745,17 @@ export class WorkbenchStore {
         }),
       );
 
-      this.setDocuments(newFileMap);
       this.#filesStore.files.set(newFileMap);
 
-      // Optionally select the first file, etc.
       const filePaths = Object.keys(newFileMap);
+
+      this.unsavedFiles.set(new Set(filePaths));
+
+      await this.saveAllFiles();
+
+      localStorage.setItem('fileTreeData', JSON.stringify(newFileMap));
+
+      // Optionally select the first file, etc.
 
       if (filePaths.length) {
         this.setSelectedFile(filePaths[0]);

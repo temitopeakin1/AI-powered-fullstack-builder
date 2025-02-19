@@ -36,13 +36,13 @@ export const FileTree = memo(
     allowFolderSelection = false,
     hiddenFiles,
     className,
-    unsavedFiles,
     onFilesChange,
     taskId,
   }: Props) => {
     renderLogger.trace('FileTree');
 
     const files = useStore(workbenchStore.files);
+    const unsavedFiles = useStore(workbenchStore.unsavedFiles);
     const [newFileName, setNewFileName] = useState('');
     const [localFiles, setLocalFiles] = useState<FileMap>(files || {});
     const [activeFolderInput, setActiveFolderInput] = useState<string | null>(null);
