@@ -8,6 +8,7 @@ export const chatStore = map({
   checkingList: false,
   errorDetails: false,
   cleaningProject: false,
+  projectImportName: undefined as undefined | string,
   mode: 'code' as 'chat' | 'code',
   isStreaming: false,
 });
@@ -37,5 +38,8 @@ export function setCleaningProject(cleaningProject: false | true) {
 }
 export function setErrorDetails(errorDetails: false | true) {
   chatStore.setKey('errorDetails', errorDetails);
+}
+export function setProjectImportName(projectImportName: undefined | string) {
+  chatStore.setKey('projectImportName', projectImportName);
 }
 

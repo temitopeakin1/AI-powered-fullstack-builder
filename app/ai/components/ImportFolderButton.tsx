@@ -1,35 +1,21 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState } from 'react';
 import type { Message } from 'ai';
 import { toast } from 'react-toastify';
 import { isBinaryFile, MAX_FILES, shouldIncludeFile } from '~/utils/fileUtils';
 import { createChatFromFolder } from '~/utils/folderImport';
 import { logStore } from '~/ai/lib/stores/logs'; // Assuming logStore is imported from this location
+import { useStore } from '@nanostores/react';
+import { chatStore, setProjectImportName } from '../lib/stores/chat';
 
-
-// interface ImportFolderButtonProps {
-//   projectName?: string;
-// }
-
-// export const ImportFolderButton: React.FC<ImportFolderButtonProps> = ({ projectName }) => {
-//   console.log("PROJECT NAME:", projectName); // Should log "Hello World"
-
-//   return <div>{projectName}</div>;
-// };
 
 interface ImportFolderButtonProps {
   className?: string;
   importChat?: (description: string, messages: Message[]) => Promise<void>;
-  // getProjectName: () => string;
-  projectNameRef?: string;
 }
 
-export const ImportFolderButton: React.FC<ImportFolderButtonProps> = ({ className, importChat, projectNameRef }) => {
+export const ImportFolderButton: React.FC<ImportFolderButtonProps> = ({ className, importChat }) => {
   const [isLoading, setIsLoading] = useState(false);
-
-  // const projectNameRef = getProjectName();
-
-  // console.log("PROJECT NAME UPDATED:", getProjectName());
-  console.log("PROJECT NAME : " + projectNameRef)
+  const { projectImportName } = useStore(chatStore)
 
   const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const allFiles = Array.from(e.target.files || []);
@@ -99,16 +85,9 @@ export const ImportFolderButton: React.FC<ImportFolderButtonProps> = ({ classNam
       const messages = await createChatFromFolder(textFiles, binaryFilePaths, folderName);
 
       if (importChat) {
-        console.log("IMPORT CHAT")
-        let projectDescription = folderName;
-        if( projectNameRef != ""){
-          projectDescription = projectNameRef || "";
-        }
-        console.log("IMPORT - PROJECT NAME ", projectNameRef);
-
-        console.log("PROJECT DESC " + projectDescription)
-        
+        const projectDescription = projectImportName || folderName;
         await importChat(projectDescription, [...messages]);
+        setProjectImportName(undefined); // reset project name
       }
 
       logStore.logSystem('Folder imported successfully', {
@@ -127,13 +106,11 @@ export const ImportFolderButton: React.FC<ImportFolderButtonProps> = ({ classNam
     }
   };
 
-  const inputRef = useRef<HTMLInputElement>(null);
 
   return (
     <>
       <input
         type="file"
-        ref={inputRef}
         id="folder-import"
         className="hidden"
         webkitdirectory=""
@@ -143,15 +120,14 @@ export const ImportFolderButton: React.FC<ImportFolderButtonProps> = ({ classNam
       />
       <button
         onClick={() => {
-          // const input = document.getElementById('folder-import');
-          inputRef.current?.click();
+          const input = document.getElementById('folder-import');
+          input?.click()
         }}
         className={className}
         disabled={isLoading}
       >
         <div className="i-ph:upload-simple" />
         {isLoading ? 'Importing...' : 'Import Folder'}
-        {projectNameRef}
       </button>
     </>
   );

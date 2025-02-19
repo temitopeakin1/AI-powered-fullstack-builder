@@ -1,7 +1,6 @@
 import type { Message } from 'ai';
 import { toast } from 'react-toastify';
 import { ImportFolderButton } from '~/ai/components/ImportFolderButton';
-import { useRef } from 'react';
 
 
 type ChatData = {
@@ -10,7 +9,6 @@ type ChatData = {
 };
 
 export function ImportButtons(importChat: ((description: string, messages: Message[]) => Promise<void>) | undefined) {
-  const projectNameRef = useRef("");
 
   return (
     <div className="flex flex-col items-center justify-center w-auto mb-[10px]">
@@ -70,7 +68,6 @@ export function ImportButtons(importChat: ((description: string, messages: Messa
             Import Chat
           </button>
           <ImportFolderButton
-            // getProjectName={() => projectNameRef.current}
             importChat={importChat}
             className="px-4 py-2 font-light rounded-lg border border-biela-elements-borderColor bg-biela-elements-prompt-background text-biela-elements-textPrimary hover:bg-biela-elements-background-depth-3 transition-all flex items-center gap-2"
           />
