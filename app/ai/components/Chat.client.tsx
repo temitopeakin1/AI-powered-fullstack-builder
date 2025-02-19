@@ -719,6 +719,20 @@ export const ChatImpl = memo(
         data: messageOptions,
       };
 
+      const supabaseMessage = {
+        role: 'user',
+        id: 'instruct',
+        content: [
+          {
+            type: 'text',
+            text: ` User is connected to Supabase: following the Mandatory Sequence is your core role now when dealing with databases. Use supabase connection credentials provided by user Project URL: ${localStorage.getItem('projectUrl')}, Anon Key: ${localStorage.getItem('annonKey')}`
+          }
+        ]
+      } as any;
+
+      const hasSupabaseCredentials = localStorage.getItem('projectUrl') && localStorage.getItem('annonKey');
+
+
       // Filter existing messages and add the import files at the start and the new message at the end
       const hasData =
         (initialImportRef.current && Object.keys(initialImportRef.current).length > 0) ||
@@ -728,6 +742,7 @@ export const ChatImpl = memo(
         ...(chatStore.get().mode === 'code' || hasData ? [importFiles, changedFiles] : []),
         ...(chatStore.get().mode === 'chat' || hasData ? [] : [copyrightMessage]),
         instructionMessage,
+        ...(hasSupabaseCredentials ? [supabaseMessage] : []),
         ...filterMessages(messages),
         newMessage,
       ];
@@ -761,6 +776,24 @@ export const ChatImpl = memo(
 
       textareaRef.current?.blur();
     };
+
+    useEffect(() => {
+
+      const justConnected = localStorage.getItem('justConnectedSupabase');
+      if (justConnected === 'true') {
+        localStorage.removeItem('justConnectedSupabase');
+
+        setTimeout(() => {
+          workbenchStore.actionAlert.set({
+            type: 'database',
+            title: 'Database Creation',
+            description: 'Would you like to create a database for your project?',
+            content: 'Content',
+            source: 'preview'
+          });
+        }, 1000);
+      }
+    }, []);
 
     /**
      * Handles the change event for the textarea and updates the input state.

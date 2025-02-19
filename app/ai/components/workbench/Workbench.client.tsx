@@ -31,6 +31,8 @@ import { chatStore, setShowChat } from '~/ai/lib/stores/chat';
 import WithTooltip from '~/ai/components/Tooltip';
 import { uploadProject } from '~/ai/lib/stores/projects/code';
 import SaveApp from '~/assets/icons/save-app.svg';
+import SupabaseConnectClient from "~/components/supabase/SupabaseConnect.client";
+
 
 import type { Message } from 'ai';
 
@@ -316,6 +318,11 @@ export const Workbench = memo(({ chatStarted, isStreaming }: WorkspaceProps) => 
                 <div className="right-part-btn">
                   {selectedView === 'code' && (
                     <div className="flex overflow-y-auto">
+                      <div className="flex gap-1">
+                        <div className={`${isStreaming ? 'opacity-50 pointer-events-none' : ''}`}>
+                          <SupabaseConnectClient />
+                        </div>
+                      </div>
                       <div className="flex gap-1">
                         <button onClick={handleSaveAppClick} key="i-ph:save-app" className={'download-btn'}>
                           <img src={SaveApp} alt="Save App" />
