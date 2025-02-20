@@ -8,12 +8,17 @@ import type { Message } from 'ai';
 
 export default function ProjectUpload({ closeModal }: ProjectUploadProps) {
   const [selectedFiles, setSelectedFiles] = useState<FileList | null>(null);
+  const [projectTitle, setProjectTitle] = useState('');
 
   const handleFileSelect = (files: FileList | null) => {
     setSelectedFiles(files);
   };
 
   const handleUploadProjectClick = (messages: Message[]) => {};
+
+  const handleTitleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setProjectTitle(e.target.value);
+  };
 
   return (
     <div className="fixed inset-0 flex items-center justify-center backdrop-blur-[5px] z-50">
@@ -39,6 +44,8 @@ export default function ProjectUpload({ closeModal }: ProjectUploadProps) {
                 type="text"
                 name="title"
                 id="title"
+                value={projectTitle}
+                onChange={handleTitleChange}
                 placeholder="Give a title"
                 className="w-full h-full bg-transparent font-inter text-white placeholder-white bg-[linear-gradient(0deg,_rgba(0,_0,_0,_0.048)_0%,_rgba(31,_31,_31,_0.8)_100%)] border border-[#2E2E2E] border-image-slice-1 backdrop-[blur(50px)] rounded-md focus:outline-none px-4 text-base pt-5 group"
               />

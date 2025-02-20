@@ -294,6 +294,10 @@ const ActionList = memo(({ actions }: ActionListProps) => {
                       Start Application
                     </span>
                   </a>
+                ) :type === 'migration' ? (
+                  <div className="flex items-center w-full min-h-[28px]">
+                    <span className="flex-1">Run migration</span>
+                  </div>
                 ) : null}
               </div>
               {(type === 'shell' || type === 'start' || type === 'unit_testing_shell') && (
