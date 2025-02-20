@@ -30,8 +30,6 @@ import ignore from 'ignore';
 import { Header } from '~/components/common/Header/Header';
 import { uploadChatMessages } from '~/ai/lib/stores/projects/chat';
 import { backendApiFetch } from '~/ai/lib/backend-api';
-import ErrorTooLongDialog from '~/ai/components/ErrorToLongDialog';
-import ErrorSupabaseDialog from '~/ai/components/ErrorSupabaseDialog';
 
 interface FileData {
   type: 'file' | 'folder';
@@ -172,23 +170,11 @@ const logger = createScopedLogger('Chat');
 export function Chat() {
   renderLogger.trace('Chat');
 
-  const [isErrorTooLongDialogOpen, setErrorTooLongDialogOpen] = useState(false);
-  const [isErrorSupabaseDialogOpen, setErrorSupabaseDialogOpen] = useState(false);
-
-  const handleEditMessage = (event: React.UIEvent) => {
-    setErrorTooLongDialogOpen(false);
-  };
-
-  const handleSupabaseMessage = (event: React.UIEvent) => {
-    setErrorSupabaseDialogOpen(false);
-  };
-
   const { ready, initialMessages, storeMessageHistory, importChat, exportChat } = useChatHistory();
   const title = useStore(description);
   useEffect(() => {
     workbenchStore.setReloadedMessages(initialMessages.map((m) => m.id));
   }, [initialMessages]);
-
 
   return (
     <>
@@ -275,29 +261,12 @@ interface ChatProps {
   importChat: (description: string, messages: Message[]) => Promise<void>;
   exportChat: () => void;
   description?: string;
-  isErrorTooLongDialogOpen: boolean;
-  isErrorSupabaseDialogOpen: boolean;
-  setErrorTooLongDialogOpen: React.Dispatch<React.SetStateAction<boolean>>;
-  setErrorSupabaseDialogOpen: React.Dispatch<React.SetStateAction<boolean>>
-  handleEditMessage: (event: React.UIEvent) => void;
-  handleSupabaseMessage: (event: React.UIEvent) => void;
 }
 
 export const ChatImpl = memo(
   ({ description, initialMessages, storeMessageHistory, importChat, exportChat }: ChatProps) => {
     useShortcuts();
 
-    const [isErrorTooLongDialogOpen, setErrorTooLongDialogOpen] = useState(false);
-    const [isErrorSupabaseDialogOpen, setErrorSupabaseDialogOpen] = useState(false);
-
-    const handleEditMessage = (event: React.UIEvent) => {
-      setErrorTooLongDialogOpen(false);
-      textareaRef.current?.focus();
-    };
-    const handleSupabaseMessage = (event: React.UIEvent) => {
-      setErrorSupabaseDialogOpen(false);
-      textareaRef.current?.focus();
-    };
     const textareaRef = useRef<HTMLTextAreaElement>(null);
     const [chatStarted, setChatStarted] = useState(initialMessages?.length > 0 || false);
     const [uploadedFiles, setUploadedFiles] = useState<File[]>([]); // Move here
@@ -332,19 +301,10 @@ export const ChatImpl = memo(
       sendExtraMessageFields: true,
       onError: (error) => {
         logger.error('Request failed\n\n', error);
-        setErrorSupabaseDialogOpen(true);
+        toast.error(
+          'There was an error processing your request: ' + (error.message ? error.message : 'No details were returned'),
+        );
       },
-      // onError: (error) => {
-      //   logger.error('Request failed\n\n', error);
-      //   setErrorTooLongDialogOpen(true);
-      // },
-      // onError: (error) => {
-      //   logger.error('Request failed\n\n', error);
-      //   toast.error(
-      //     'There was an error processing your request: ' + (error.message ? error.message : 'No details were returned'),
-      //   );
-      // },
-
       onFinish: (message, response) => {
         const usage = response?.usage;
 
@@ -381,17 +341,17 @@ export const ChatImpl = memo(
             const isLastUser = !messages.slice(index + 1).some((m) => m.role === 'user');
             const modifiedContent = Array.isArray(message?.content)
               ? message.content.map((contentItem: { type: string; text: string }) => {
-                  if (contentItem.type === 'text') {
-                    return {
-                      ...contentItem,
-                      text:
-                        contentItem.text.replace('Current Message:\n\n', `Previous Message #${currentIndex}:\n\n`) +
-                        (isLastUser ? '\n\n(Assistant response below)' : '\n\n(Assistant response omitted)'),
-                    };
-                  }
+                if (contentItem.type === 'text') {
+                  return {
+                    ...contentItem,
+                    text:
+                      contentItem.text.replace('Current Message:\n\n', `Previous Message #${currentIndex}:\n\n`) +
+                      (isLastUser ? '\n\n(Assistant response below)' : '\n\n(Assistant response omitted)'),
+                  };
+                }
 
-                  return contentItem;
-                })
+                return contentItem;
+              })
               : [];
 
             acc.push({
@@ -969,22 +929,6 @@ export const ChatImpl = memo(
           actionAlert={actionAlert}
           clearAlert={() => workbenchStore.clearAlert()}
         />
-
-        {/*{isErrorTooLongDialogOpen && (*/}
-        {/*  <ErrorTooLongDialog*/}
-        {/*    isOpen={isErrorTooLongDialogOpen}*/}
-        {/*    onEdit={handleEditMessage}*/}
-        {/*    onClose={() => setErrorTooLongDialogOpen(false)}*/}
-        {/*  />*/}
-        {/*)}*/}
-
-        {isErrorSupabaseDialogOpen && (
-          <ErrorSupabaseDialog
-            isOpen={isErrorSupabaseDialogOpen}
-            onEdit={handleSupabaseMessage}
-            onClose={() => setErrorSupabaseDialogOpen(false)}
-          />
-        )}
       </div>
     );
   },
