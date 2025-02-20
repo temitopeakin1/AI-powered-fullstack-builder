@@ -3,6 +3,7 @@ import { useNavigate } from '@remix-run/react';
 import {Check} from "lucide-react";
 import {backendApiFetch} from "~/ai/lib/backend-api";
 import {workbenchStore} from "~/ai/lib/stores/workbench";
+import LoadingAnimation from '~/ai/components/LoadingAnimation';
 
 
 export const OAuthCallbackClient = () => {
@@ -80,8 +81,7 @@ export const OAuthCallbackClient = () => {
     <>
       {isLoading ? (
         <div className="flex items-center justify-center min-h-screen">
-          <div className="animate-spin rounded-full h-16 w-16 border-t-2 border-b-2 border-blue-500"></div>
-          <span className="ml-4 text-white">Connecting to Supabase...</span>
+          <LoadingAnimation />
         </div>
       ) : isSuccess ? (
         <div className="flex items-center justify-center min-h-screen">
