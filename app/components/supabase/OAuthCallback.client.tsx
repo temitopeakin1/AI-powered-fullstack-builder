@@ -99,6 +99,7 @@ export const OAuthCallbackClient = () => {
           isOpen={isErrorSupabaseDialogOpen}
           onEdit={handleRetry}
           onClose={() => setErrorSupabaseDialogOpen(false)}
+          isLoading={isLoading}
         />
       )}
     </>
