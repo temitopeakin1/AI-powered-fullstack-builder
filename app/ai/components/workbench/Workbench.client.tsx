@@ -30,6 +30,7 @@ import { chatStore, setShowChat } from '~/ai/lib/stores/chat';
 import WithTooltip from '~/ai/components/Tooltip';
 import { downloadProjectZipBuffer, uploadProject } from '~/ai/lib/stores/projects/code';
 import SaveApp from '~/assets/icons/save-app.svg';
+import SupabaseConnectClient from "~/components/supabase/SupabaseConnect.client";
 import RestoreApp from '~/assets/icons/restore-app.svg';
 
 import type { Message } from 'ai';
@@ -313,6 +314,11 @@ export const Workbench = memo(({ chatStarted }: WorkspaceProps) => {
                 <div className="right-part-btn">
                   {selectedView === 'code' && (
                     <div className="flex overflow-y-auto">
+                      <div className="flex gap-1">
+                        <div className={`${isStreaming ? 'opacity-50 pointer-events-none' : ''}`}>
+                          <SupabaseConnectClient />
+                        </div>
+                      </div>
                       <div className="flex gap-1">
                         <WithTooltip
                           tooltip={

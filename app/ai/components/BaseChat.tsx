@@ -36,6 +36,7 @@ import CheckList from '~/assets/icons/checkList';
 import { chatStore, setCheckingList, setCleaningProject, setShowPrompt } from '~/ai/lib/stores/chat';
 import { useStore } from '@nanostores/react';
 import { useParams } from '@remix-run/react';
+import {backendApiFetch} from "~/ai/lib/backend-api";
 
 const TEXTAREA_MIN_HEIGHT = 76;
 
@@ -102,18 +103,87 @@ export const BaseChat = React.forwardRef<HTMLDivElement, BaseChatProps>(
     const [transcript, setTranscript] = useState('');
     const { showPrompt, checkingList, cleaningProject } = useStore(chatStore);
     const { chatId } = useParams();
+    const [rotation, setRotation] = useState(0);
+
+    useEffect(() => {
+      let active = true;
+      // Pornim animația de la starea curentă a rotației
+      let angle = rotation;
+      const step = 1;
+      const duration = 5000;
+      const interval = duration / 360;
+
+      function updateRotation() {
+        if (!active) return;
+        // Incrementăm unghiul și îl normalizăm la [0, 360)
+        angle = (angle + step) % 360;
+        setRotation(angle);
+
+        // Dacă streaming-ul este activ, continuăm animația.
+        // Dacă nu, mai continuăm doar până când unghiul revine la 0.
+        if (isStreaming || angle !== 0) {
+          setTimeout(() => {
+            requestAnimationFrame(() => {
+              if (active) {
+                updateRotation();
+              }
+            });
+          }, interval);
+        } else {
+          // Când animația s-a terminat (angle a revenit la 0), oprim animația.
+          setRotation(0);
+        }
+      }
+
+      // Pornim animația dacă:
+      // - streaming-ul e activ, sau
+      // - streaming-ul a devenit false, dar animația nu s-a terminat încă (rotation !== 0)
+      if (isStreaming || rotation !== 0) {
+        updateRotation();
+      }
+
+      // Cleanup: oprim orice actualizare ulterioară când componenta se demontează sau când 'isStreaming' se schimbă
+      return () => {
+        active = false;
+      };
+    }, [isStreaming]);
+
 
     useEffect(() => {
       if (chatId) {
         localStorage.setItem('chatId', chatId);
       }
     }, [chatId]);
+
+    const abort = async () => {
+      if (isStreaming) {
+        try {
+          await backendApiFetch('/ai/abort', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+          });
+
+          handleStop?.();
+
+        } catch (error) {
+          logger.error('Error during abort:', error);
+          handleStop?.();
+        }
+      }
+    };
     /**
      * Keep an eye on transcript changes for debugging
      */
     useEffect(() => {
       logger.debug('Transcript from speech:', transcript);
     }, [transcript]);
+
+    useEffect(() => {
+      localStorage.removeItem('projectUrl');
+      localStorage.removeItem('annonKey');
+    }, []);
 
     useEffect(() => {
       // Setup speech recognition
@@ -403,6 +473,13 @@ export const BaseChat = React.forwardRef<HTMLDivElement, BaseChatProps>(
       sendMessage?.({} as React.UIEvent, checklistPrompt);
     };
 
+    const { mode } = useStore(chatStore);
+
+    const placeholderText =
+      mode === 'code'
+        ? "If you can imagine it, BIELA can code it, what shall we do today?"
+        : "How can I help you today? Let’s do something amazing together";
+
     const baseChat = (
       <div
         ref={ref}
@@ -462,18 +539,21 @@ export const BaseChat = React.forwardRef<HTMLDivElement, BaseChatProps>(
               <ClientOnly>
                 {() => (
                   <div
-                    style={{ zIndex: '1' }}
+                    style={{ zIndex: '1', '--rotaion-variable': `${rotation}deg` }}
                     className={classNames(
-                      `${actionAlert?.type === 'preview' && !isStreaming && 'chat-on-error'} backdrop-blur-[15px] flex flex-col place-items-center align-items-center justify-center rounded-lg relative w-full max-w-chat mx-auto z-prompt base-chat `,
+                      `${(actionAlert?.type === 'preview' || actionAlert?.type === 'migration')  && 'chat-on-error'} backdrop-blur-[15px] transition-all flex flex-col place-items-center align-items-center justify-center rounded-lg relative w-full max-w-chat mx-auto z-prompt base-chat`,
                       {
                         'sticky bottom-2': chatStarted,
-                      },
+                        'chat-mode': mode === 'chat' // Add the chat-mode class when chat is active
+                      }
                     )}
                   >
                     {/*<div className={'loop-border'}></div>*/}
                     {chatStarted && <TokenRemaining isStreaming={isStreaming} />}
                     <div className={classNames(styles.containerUnitTesting, 'w-full')}>
-                      {actionAlert?.type === 'preview' && !isStreaming && (
+
+                      {((actionAlert?.type === 'error' && isStreaming) ||
+                        (actionAlert?.type === 'migration')) && (
                         <ChatAlert
                           alert={actionAlert}
                           clearAlert={() => clearAlert?.()}
@@ -492,6 +572,19 @@ export const BaseChat = React.forwardRef<HTMLDivElement, BaseChatProps>(
                           clearAlert={() => clearAlert?.()}
                           postMessage={() => {
                             sendMessage?.({} as React.UIEvent, 'Run Unit Tests for my Project');
+                            clearAlert?.();
+                          }}
+                        />
+                      )}
+                      {actionAlert?.type === 'database' && !isStreaming && (
+                        <ChatSuggestion
+                          title={'Database Creation'}
+                          message={'Would you like to create a database for your project?'}
+                          primaryButtonText={'Create Database'}
+                          secondaryButtonText={'Dismiss'}
+                          clearAlert={() => clearAlert?.()}
+                          postMessage={() => {
+                            sendMessage?.({} as React.UIEvent, 'Create a database for my project');
                             clearAlert?.();
                           }}
                         />
@@ -520,10 +613,11 @@ export const BaseChat = React.forwardRef<HTMLDivElement, BaseChatProps>(
                       {/* The prompt textarea + send button */}
                       <div
                         className={classNames(
-                          `relative container-chat-bg transition-all ${!showPrompt ? 'show-prompt' : 'hide-prompt'}`,
+                          `relative container-chat-bg transition-all ${!showPrompt ? 'show-prompt' : 'hide-prompt'}`
                         )}
                       >
-                        <div className="flex justify-between items-center top-header-prompt text-sm p-3 shadow-xs border-b border-biela-elements-borderColor max-sm:flex-wrap max-sm:gap-2">
+                        <div
+                          className="flex justify-between items-center top-header-prompt text-sm p-3 shadow-xs border-b border-biela-elements-borderColor max-sm:flex-wrap max-sm:gap-2">
                           <ChatCodeSwitch />
                           <div className={'flex gap-[6px] items-center'}>
                             <WithTooltip tooltip={checkingList ? 'Checking the features' : 'Checklists'}>
@@ -542,7 +636,7 @@ export const BaseChat = React.forwardRef<HTMLDivElement, BaseChatProps>(
                               <WithTooltip tooltip={`${!showPrompt ? 'Hide Prompt' : 'Show Prompt'}`}>
                                 <button
                                   style={{
-                                    backgroundImage: 'linear-gradient(180deg, #010101 57.32%, #161616 100%)',
+                                    backgroundImage: 'linear-gradient(180deg, #010101 57.32%, #161616 100%)'
                                   }}
                                   className="p-[4px] border rounded-full border-[#2E2E2E] flex items-center"
                                   onClick={() => {
@@ -564,7 +658,7 @@ export const BaseChat = React.forwardRef<HTMLDivElement, BaseChatProps>(
                           className={classNames(
                             'w-full p-[24px] outline-none resize-none text-biela-elements-textPrimary placeholder-biela-elements-textTertiary bg-transparent text-sm chat-textarea-font',
                             'transition-all duration-200',
-                            'hover:border-biela-elements-focus',
+                            'hover:border-biela-elements-focus'
                           )}
                           onDragEnter={(e) => {
                             e.preventDefault();
@@ -629,7 +723,6 @@ export const BaseChat = React.forwardRef<HTMLDivElement, BaseChatProps>(
                                 return;
                               }
 
-                              // ignore if using input method engine
                               if (event.nativeEvent.isComposing) {
                                 return;
                               }
@@ -652,14 +745,15 @@ export const BaseChat = React.forwardRef<HTMLDivElement, BaseChatProps>(
                           onPaste={handlePaste}
                           style={{
                             minHeight: TEXTAREA_MIN_HEIGHT,
-                            maxHeight: TEXTAREA_MAX_HEIGHT,
+                            maxHeight: TEXTAREA_MAX_HEIGHT
                           }}
-                          placeholder="If you can imagine it, BIELA can code it, what shall we do today?"
+                          placeholder={placeholderText}
                           translate="no"
                         />
 
                         {/* Footer row under the textarea */}
-                        <div className="flex justify-between items-center text-sm p-3 prompt-actions-button shadow-xs border-t border-biela-elements-borderColor h-[56px]">
+                        <div
+                          className="flex justify-between items-center text-sm p-3 prompt-actions-button shadow-xs border-t border-biela-elements-borderColor h-[56px]">
                           <div className="flex max-sm:gap-[8px] max-sm:w-full gap-3 items-center">
                             <div className={'flex gap-3 items-center'}>
                               <IconButton
@@ -720,7 +814,7 @@ export const BaseChat = React.forwardRef<HTMLDivElement, BaseChatProps>(
                                 disabled={isStreaming}
                                 onClick={(event) => {
                                   if (isStreaming) {
-                                    handleStop?.();
+                                    abort();
                                     return;
                                   }
 

@@ -1,4 +1,4 @@
-export type ActionType = 'file' | 'shell' | 'unit_testing_shell';
+export type ActionType = 'file' | 'shell' | 'unit_testing_shell' | 'migration';
 
 export interface BaseAction {
   content: string;
@@ -21,7 +21,14 @@ export interface StartAction extends BaseAction {
   type: 'start';
 }
 
-export type bielaAction = FileAction | ShellAction | UnitTestingShellAction | StartAction;
+export interface MigrationAction extends BaseAction {
+  type: 'migration';
+  path: string;
+}
+
+export type bielaAction = FileAction | ShellAction | UnitTestingShellAction | StartAction | MigrationAction;
+
+
 
 export type bielaActionData = bielaAction | BaseAction;
 
