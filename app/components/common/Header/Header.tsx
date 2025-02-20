@@ -29,6 +29,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 const ListsItems = [
   { title: 'Home', icon: HomeIcon },
   { title: 'Dashboard', icon: DashboardIcon },
+  { title: 'Leaderboard', icon: DashboardIcon },
   { title: 'Profile', icon: UserIcon },
   { title: 'Settings', icon: SettingsIcon },
   { title: 'Help', icon: HelpIcon },
