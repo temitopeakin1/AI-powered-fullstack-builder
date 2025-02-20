@@ -720,35 +720,13 @@ export const ChatImpl = memo(
         ],
       };
 
-      const designPrompt = {
-        role: 'user',
-        id: 'design-instruct',
-        content: [
-          {
-            type: 'text',
-            text: 'For all designs I ask you to make, have them be beautiful, not cookie cutter. Make webpages that are fully featured and worthy for production.\n\nUse relevant stock photos from pexels where appropriate, only valid URLs you know exist. Do not download the images, only link to them in image tags.',
-          },
-        ],
-      };
-
-      const fileRule = {
-        role: 'user',
-        id: 'file-creation-rule',
-        content: [
-          {
-            type: 'text',
-            text: 'When creating files for a project, you MUST follow these critical rules:\n\n0. React Project Requirements:\n- ALWAYS import React in EVERY file that uses JSX/TSX: `import React from "react";`\n- NEVER assume React is globally available - always import it explicitly\n- Create ALL configuration files (vite.config.js, postcss.config.js, tailwind.config.js) AND index.html\n\n1. File Dependencies:\n- ALWAYS analyze dependencies between files before starting to write them\n- Create files in dependency order - dependencies must be created before files that import them\n- For React\next.js projects, create shared components, utilities, and hooks BEFORE files that use them\n- Create configuration files (package.json, tsconfig.json, etc.) FIRST\n\n2. Component Dependencies:\n- Create base/shared components before composite components that use them\n- Create utility functions and hooks before components that use them\n- Create context providers before components that consume them\n\n3. File Organization:\n- Group related files together (e.g., components with their styles)\n- Create parent components before child components\n- Create layout components before page components\n\n4. Import Resolution:\n- Ensure all imported files exist before creating a file that imports them\n- Use consistent import paths (prefer absolute imports with path aliases)\n- Create all necessary type definitions before files that use them\n\n5. Configuration Priority:\n- Create package.json with all dependencies first\n- Create TypeScript/JavaScript configuration files next\n- Create styling configuration files (Tailwind, CSS modules) after\n- Create routing configuration last\n\n6. Testing Files:\n- Create test utilities before test files\n- Create mock data files before tests that use them\n- Create test files after their corresponding implementation files\n\nCRITICAL: NEVER create a file that imports from non-existent files. Always create dependencies first!',
-          },
-        ],
-      };
-
       const instructionMessage = {
         role: 'user',
         id: 'instruct',
         content: [
           {
             type: 'text',
-            text: 'Make sure to build the application using React + Vite + JavaScript ONLY if the imported-files message above contains no imported files and no other technology is requested by the user.\n\nBelow is the conversation history, including all previous messages along with the most recent assistant response. Please reference this context to inform your future responses and maintain conversation continuity.',
+            text: 'Below is the conversation history, including all previous messages along with the most recent assistant response. Please reference this context to inform your future responses and maintain conversation continuity.',
           },
         ],
       };
@@ -761,18 +739,7 @@ export const ChatImpl = memo(
             type: 'text',
             text: "When first creating a website, handle the copyright bar at the bottom of the footer as follows:\n\n1. If the user has specifically requested copyright content:\n- Implement only the user-requested copyright elements\n- Format them to blend naturally with the footer design\n\n2. If the user has NOT specified any copyright content:\n- Include a slim copyright bar (instead of any default copyright notice) at the very bottom that blends naturally with the footer design\n- This bar should be visually distinct but subtle, vertically compact with minimal padding ensuring it integrates harmoniously with the overall footer style\n- The copyright bar should contain the text: 'AI-powered development by Biela.dev, powered by TeachMeCode® Institute' in a way that complements the footer's typography and layout\n- Ensure it adapts seamlessly to the website's design language\n\nDo not include 'AI-powered development by Biela.dev, powered by TeachMeCode® Institute' if the user has provided their own copyright content - they are mutually exclusive.",
           },
-        ],
-      };
-
-      const languageRespond = {
-        role: 'user',
-        id: 'language-instruct',
-        content: [
-          {
-            type: 'text',
-            text: 'Ensure your response matches the language of the given input.',
-          },
-        ],
+        ]
       };
 
       const newMessage = {
@@ -792,6 +759,20 @@ export const ChatImpl = memo(
         data: messageOptions,
       };
 
+      const supabaseMessage = {
+        role: 'user',
+        id: 'instruct',
+        content: [
+          {
+            type: 'text',
+            text: ` User is connected to Supabase: following the Mandatory Sequence is your core role now when dealing with databases. Use supabase connection credentials provided by user Project URL: ${localStorage.getItem('projectUrl')}, Anon Key: ${localStorage.getItem('annonKey')}`
+          }
+        ]
+      } as any;
+
+      const hasSupabaseCredentials = localStorage.getItem('projectUrl') && localStorage.getItem('annonKey');
+
+
       // Filter existing messages and add the import files at the start and the new message at the end
       const hasData =
         (initialImportRef.current && Object.keys(initialImportRef.current).length > 0) ||
@@ -799,8 +780,9 @@ export const ChatImpl = memo(
 
       const filteredMessages = [
         ...(chatStore.get().mode === 'code' || hasData ? [importFiles, changedFiles] : []),
-        ...(chatStore.get().mode === 'code' ? [designPrompt, fileRule, instructionMessage, languageRespond] : []),
         ...(chatStore.get().mode === 'chat' || hasData ? [] : [copyrightMessage]),
+        instructionMessage,
+        ...(hasSupabaseCredentials ? [supabaseMessage] : []),
         ...filterMessages(messages),
         newMessage,
       ];
@@ -834,6 +816,24 @@ export const ChatImpl = memo(
 
       textareaRef.current?.blur();
     };
+
+    useEffect(() => {
+
+      const justConnected = localStorage.getItem('justConnectedSupabase');
+      if (justConnected === 'true') {
+        localStorage.removeItem('justConnectedSupabase');
+
+        setTimeout(() => {
+          workbenchStore.actionAlert.set({
+            type: 'database',
+            title: 'Database Creation',
+            description: 'Would you like to create a database for your project?',
+            content: 'Content',
+            source: 'preview'
+          });
+        }, 1000);
+      }
+    }, []);
 
     /**
      * Handles the change event for the textarea and updates the input state.

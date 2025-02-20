@@ -1,4 +1,4 @@
-import type { ActionType, bielaAction, bielaActionData, FileAction, ShellAction } from '~/types/actions';
+import type { ActionType, bielaAction, bielaActionData, FileAction, ShellAction,MigrationAction } from '~/types/actions';
 import type { bielaArtifactData } from '~/types/artifact';
 import { createScopedLogger } from '~/utils/logger';
 import { unreachable } from '~/utils/unreachable';
@@ -281,10 +281,20 @@ export class StreamingMessageParser {
 
     const actionType = this.#extractAttribute(actionTag, 'type') as ActionType;
 
+    if (actionTag.includes('bielaMigration')) {
+      const path = this.#extractAttribute(actionTag, 'path') as string;
+      return {
+        type: 'migration' as const,
+        path,
+        content: ''
+      };
+    }
+
     const actionAttributes = {
       type: actionType,
       content: '',
     };
+
 
     if (actionType === 'file') {
       const filePath = this.#extractAttribute(actionTag, 'filePath') as string;
@@ -294,11 +304,19 @@ export class StreamingMessageParser {
       }
 
       (actionAttributes as FileAction).filePath = filePath;
-    } else if (!['shell', 'start', 'unit_testing_shell'].includes(actionType)) {
+    }
+    else if (actionType === 'migration') {
+      const path = this.#extractAttribute(actionTag, 'path') as string;
+      if (!path) {
+        logger.debug('Migration path not specified');
+      }
+      (actionAttributes as MigrationAction).path = path;
+
+    }else if (!['shell', 'start', 'unit_testing_shell'].includes(actionType)) {
       logger.warn(`Unknown action type '${actionType}'`);
     }
 
-    return actionAttributes as FileAction | ShellAction;
+    return actionAttributes as FileAction | ShellAction | MigrationAction;
   }
 
   #extractAttribute(tag: string, attributeName: string): string | undefined {
