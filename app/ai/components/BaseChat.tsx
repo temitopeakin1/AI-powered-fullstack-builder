@@ -38,6 +38,7 @@ import { useStore } from '@nanostores/react';
 import { createScopedLogger } from '~/utils/logger';
 import CleanUpIcon from '~/assets/icons/refresh.svg';
 import { useParams } from '@remix-run/react';
+import {backendApiFetch} from "~/ai/lib/backend-api";
 
 const TEXTAREA_MIN_HEIGHT = 76;
 
@@ -155,12 +156,36 @@ export const BaseChat = React.forwardRef<HTMLDivElement, BaseChatProps>(
         localStorage.setItem('chatId', chatId);
       }
     }, [chatId]);
+
+    const abort = async () => {
+      if (isStreaming) {
+        try {
+          await backendApiFetch('/ai/abort', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+          });
+
+          handleStop?.();
+
+        } catch (error) {
+          logger.error('Error during abort:', error);
+          handleStop?.();
+        }
+      }
+    };
     /**
      * Keep an eye on transcript changes for debugging
      */
     useEffect(() => {
       logger.debug('Transcript from speech:', transcript);
     }, [transcript]);
+
+    useEffect(() => {
+      localStorage.removeItem('projectUrl');
+      localStorage.removeItem('annonKey');
+    }, []);
 
     useEffect(() => {
       // Setup speech recognition
@@ -518,7 +543,7 @@ export const BaseChat = React.forwardRef<HTMLDivElement, BaseChatProps>(
                   <div
                     style={{ zIndex: '1', '--rotaion-variable': `${rotation}deg` }}
                     className={classNames(
-                      `${actionAlert?.type === 'preview' && !isStreaming && 'chat-on-error'} backdrop-blur-[15px] transition-all flex flex-col place-items-center align-items-center justify-center rounded-lg relative w-full max-w-chat mx-auto z-prompt base-chat`,
+                      `${(actionAlert?.type === 'preview' || actionAlert?.type === 'migration')  && 'chat-on-error'} backdrop-blur-[15px] transition-all flex flex-col place-items-center align-items-center justify-center rounded-lg relative w-full max-w-chat mx-auto z-prompt base-chat`,
                       {
                         'sticky bottom-2': chatStarted,
                         'chat-mode': mode === 'chat' // Add the chat-mode class when chat is active
@@ -529,7 +554,8 @@ export const BaseChat = React.forwardRef<HTMLDivElement, BaseChatProps>(
                     {chatStarted && <TokenRemaining isStreaming={isStreaming} />}
                     <div className={classNames(styles.containerUnitTesting, 'w-full')}>
 
-                      {actionAlert?.type === 'preview' && !isStreaming && (
+                      {((actionAlert?.type === 'error' && isStreaming) ||
+                        (actionAlert?.type === 'migration')) && (
                         <ChatAlert
                           alert={actionAlert}
                           clearAlert={() => clearAlert?.()}
@@ -548,6 +574,19 @@ export const BaseChat = React.forwardRef<HTMLDivElement, BaseChatProps>(
                           clearAlert={() => clearAlert?.()}
                           postMessage={() => {
                             sendMessage?.({} as React.UIEvent, 'Run Unit Tests for my Project');
+                            clearAlert?.();
+                          }}
+                        />
+                      )}
+                      {actionAlert?.type === 'database' && !isStreaming && (
+                        <ChatSuggestion
+                          title={'Database Creation'}
+                          message={'Would you like to create a database for your project?'}
+                          primaryButtonText={'Create Database'}
+                          secondaryButtonText={'Dismiss'}
+                          clearAlert={() => clearAlert?.()}
+                          postMessage={() => {
+                            sendMessage?.({} as React.UIEvent, 'Create a database for my project');
                             clearAlert?.();
                           }}
                         />
@@ -638,7 +677,40 @@ export const BaseChat = React.forwardRef<HTMLDivElement, BaseChatProps>(
                           onDrop={(e) => {
                             e.preventDefault();
                             e.currentTarget.style.border = '1px solid var(--biela-elements-borderColor)';
-                            // ... file drop logic
+
+                            const files = Array.from(e.dataTransfer.files);
+                            files.forEach((file) => {
+                              if (file.type.startsWith('image/')) {
+                                const reader = new FileReader();
+
+                                reader.onload = async (e) => {
+                                  const base64Image = e.target?.result as string;
+                                  const img = new Image();
+
+                                  img.onload = () => {
+                                    const canvas = document.createElement('canvas');
+                                    canvas.width = img.width;
+                                    canvas.height = img.height;
+
+                                    const ctx = canvas.getContext('2d');
+
+                                    if (ctx) {
+                                      ctx.drawImage(img, 0, 0);
+
+                                      const processedImage = canvas.toDataURL(file.type, 1.0);
+                                      setUploadedFiles?.([...uploadedFiles, file]);
+                                      setImageDataList?.([...imageDataList, processedImage]);
+                                    }
+                                  };
+
+                                  img.onerror = (error) => {
+                                    console.error('Error processing image:', error);
+                                  };
+                                  img.src = base64Image;
+                                };
+                                reader.readAsDataURL(file);
+                              }
+                            });
                           }}
                           onKeyDown={(event) => {
                             if (event.key === 'Enter') {
@@ -740,7 +812,7 @@ export const BaseChat = React.forwardRef<HTMLDivElement, BaseChatProps>(
                                 disabled={isStreaming}
                                 onClick={(event) => {
                                   if (isStreaming) {
-                                    handleStop?.();
+                                    abort();
                                     return;
                                   }
 

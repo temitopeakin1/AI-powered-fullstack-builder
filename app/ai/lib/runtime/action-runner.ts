@@ -1,12 +1,14 @@
 import { WebContainer } from '@webcontainer/api';
 import { atom, map, type MapStore } from 'nanostores';
 import * as nodePath from 'node:path';
-import type { ActionAlert, bielaAction } from '~/types/actions';
+import type { ActionAlert, bielaAction,MigrationAction } from '~/types/actions';
 import { createScopedLogger } from '~/utils/logger';
 import { unreachable } from '~/utils/unreachable';
 import type { ActionCallbackData } from './message-parser';
 import type { bielaShell } from '~/utils/shell';
 import { LastInputOnTerminal } from '~/ai/lib/stores/lastInputOnTerminal';
+import {backendApiFetch} from "~/ai/lib/backend-api";
+import {UserStore} from "~/ai/lib/stores/user/userStore";
 
 const logger = createScopedLogger('ActionRunner');
 
@@ -169,6 +171,10 @@ export class ActionRunner {
           await this.#runFileAction(action);
           break;
         }
+        case 'migration': {
+          await this.#runMigrationAction(action);
+          break;
+        }
         case 'start': {
           // making the start app non blocking
 
@@ -186,12 +192,15 @@ export class ActionRunner {
                 return;
               }
 
-              this.onAlert?.({
-                type: 'error',
-                title: 'Dev Server Failed',
-                description: err.header,
-                content: err.output,
-              });
+
+                this.onAlert?.({
+                  type: 'error',
+                  title: 'Dev Server Failed',
+                  description: err.header,
+                  content: err.output,
+
+              })
+
             });
 
           /*
@@ -219,12 +228,15 @@ export class ActionRunner {
         return;
       }
 
-      this.onAlert?.({
-        type: 'error',
-        title: 'Dev Server Failed',
-        description: error.header,
-        content: error.output,
-      });
+      if (action.type !==  'migration') {
+
+        this.onAlert?.({
+          type: 'error',
+          title: 'Dev Server Failed',
+          description: error.header,
+          content: error.output,
+        });
+      }
 
       // re-throw the error to be caught in the promise chain
       throw error;
@@ -321,5 +333,70 @@ export class ActionRunner {
     const actions = this.actions.get();
 
     this.actions.setKey(id, { ...actions[id], ...newState });
+  }
+
+  async #runMigrationAction(action: ActionState) {
+    if (action.type !== 'migration') {
+      unreachable('Expected migration action');
+    }
+
+    const userStore = UserStore.getInstance();
+    const user = userStore.getUser();
+
+    if (!user) {
+      return;
+    }
+    try {
+      const webcontainer = await this.#webcontainer;
+      const cleanPath = action.path.replace(/^\/home\/project\//, '');
+      const fileContent = await webcontainer.fs.readFile(cleanPath, 'utf-8');
+      const chatId = localStorage.getItem('chatID');
+      const projectSlug =localStorage.getItem('projectSlug');
+
+
+      if (!projectSlug) {
+        throw new Error('Project not found');
+      }
+
+      const response = await backendApiFetch(`/supabase/migration`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          migrationContent: fileContent,
+          path: cleanPath,
+          projectSlug: projectSlug
+        })
+      });
+
+      const migrationResponse = await response.json();
+
+
+      if (migrationResponse.success === false) {
+
+        this.onAlert?.({
+          type: 'migration',
+          title: 'Migration Failed',
+          description: migrationResponse.message,
+          content: migrationResponse.error,
+          source:'preview',
+        });
+
+        throw new Error(migrationResponse.message);
+      }
+
+      logger.info('Migration executed successfully:', migrationResponse);
+
+      return migrationResponse;
+
+    } catch (error) {
+
+      logger.error(`Migration failed for user: ${user.id} :`, error);
+      throw new ActionCommandError(
+        'Failed to execute migration',
+        ''
+      );
+    }
   }
 }
