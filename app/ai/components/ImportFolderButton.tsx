@@ -86,7 +86,7 @@ export const ImportFolderButton: React.FC<ImportFolderButtonProps> = ({ classNam
       if (importChat) {
         const projectDescription = projectImportName || folderName;
         await importChat(projectDescription, [...messages]);
-        setProjectImportName(undefined); // reset project name
+        setProjectImportName(""); // reset project name
       }
 
       logStore.logSystem('Folder imported successfully', {

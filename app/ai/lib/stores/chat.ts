@@ -1,6 +1,19 @@
-import { map } from 'nanostores';
+import { map, MapStore } from 'nanostores';
 
-export const chatStore = map({
+interface ChatStore {
+  started: boolean;
+  aborted: boolean;
+  showChat: boolean;
+  showPrompt: boolean;
+  checkingList: boolean;
+  errorDetails: boolean;
+  cleaningProject: boolean;
+  projectImportName: string;
+  mode: 'chat' | 'code';
+  isStreaming: boolean;
+};
+
+export const chatStore: MapStore<ChatStore> = map({
   started: false,
   aborted: false,
   showChat: true,
@@ -8,7 +21,7 @@ export const chatStore = map({
   checkingList: false,
   errorDetails: false,
   cleaningProject: false,
-  projectImportName: undefined as undefined | string,
+  projectImportName: "",
   mode: 'code' as 'chat' | 'code',
   isStreaming: false,
 });
@@ -39,7 +52,7 @@ export function setCleaningProject(cleaningProject: false | true) {
 export function setErrorDetails(errorDetails: false | true) {
   chatStore.setKey('errorDetails', errorDetails);
 }
-export function setProjectImportName(projectImportName: undefined | string) {
+export function setProjectImportName(projectImportName: string) {
   chatStore.setKey('projectImportName', projectImportName);
 }
 

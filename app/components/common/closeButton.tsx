@@ -6,7 +6,7 @@ const CloseButton: React.FC<CloseButtonProps> = ({ closeModal }) => {
   return (
     <div
       onClick={(e) => {
-        setProjectImportName(undefined);
+        setProjectImportName("");
         e.stopPropagation();
         closeModal();
       }}
