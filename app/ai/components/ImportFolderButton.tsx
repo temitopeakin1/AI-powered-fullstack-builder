@@ -4,6 +4,8 @@ import { toast } from 'react-toastify';
 import { isBinaryFile, MAX_FILES, shouldIncludeFile } from '~/utils/fileUtils';
 import { createChatFromFolder } from '~/utils/folderImport';
 import { logStore } from '~/ai/lib/stores/logs'; // Assuming logStore is imported from this location
+import { useStore } from '@nanostores/react';
+import { chatStore, setProjectImportName } from '../lib/stores/chat';
 
 interface ImportFolderButtonProps {
   className?: string;
@@ -12,6 +14,7 @@ interface ImportFolderButtonProps {
 
 export const ImportFolderButton: React.FC<ImportFolderButtonProps> = ({ className, importChat }) => {
   const [isLoading, setIsLoading] = useState(false);
+  const { projectImportName } = useStore(chatStore)
 
   const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const allFiles = Array.from(e.target.files || []);
@@ -81,7 +84,9 @@ export const ImportFolderButton: React.FC<ImportFolderButtonProps> = ({ classNam
       const messages = await createChatFromFolder(textFiles, binaryFilePaths, folderName);
 
       if (importChat) {
-        await importChat(folderName, [...messages]);
+        const projectDescription = projectImportName || folderName;
+        await importChat(projectDescription, [...messages]);
+        setProjectImportName(""); // reset project name
       }
 
       logStore.logSystem('Folder imported successfully', {
