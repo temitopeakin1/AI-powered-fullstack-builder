@@ -1,7 +1,7 @@
 import React, { FC } from 'react';
 import * as RadixDialog from '@radix-ui/react-dialog';
 import { motion, type Variants } from 'framer-motion';
-import dizzy from '/icons/dizzy.svg';
+import danger from '/icons/danger.svg';
 import close from '/icons/fi-sr-cross.svg';
 
 interface ErrorSupabaseDialogProps {
@@ -101,7 +101,7 @@ const ErrorSupabaseDialog: FC<ErrorSupabaseDialogProps> = ({ isOpen, onEdit, onC
 
             <div className="p-6 grid xl:flex items-center gap-8 xl:gap-2">
               <div className="flex justify-center">
-                <img src={dizzy} alt="Error Icon" className="mt-1 w-16 xl:w-8" />
+                <img src={danger} alt="Error Icon" className="mt-1 w-16 xl:w-8" />
               </div>
               <h2
                 className="_textWeight_ybcgn_45 text-white text-[18px] xl:text-[30px] not-italic font-semibold leading-[30px] xl:leading-[56px]">
