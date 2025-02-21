@@ -2,7 +2,7 @@ import { Link } from '@remix-run/react';
 import '../styles/action-card.scss';
 import { ActionCardProps } from '~/components/types/componentTypes';
 
-export default function ActionCard({ projectsCount, onCreateProjectClick, onProjectUpload }: ActionCardProps) {
+export default function ActionCard({ projectsCount, onCreateProjectClick, onProjectImport }: ActionCardProps) {
   const cards = [
     {
       title: projectsCount.toString(),
@@ -20,12 +20,12 @@ export default function ActionCard({ projectsCount, onCreateProjectClick, onProj
       link: '/',
     },
     {
-      title: 'Upload Project',
+      title: 'Import Project',
       subtitle: 'Give a subtitle',
-      iconSrc: 'icons/upload.svg',
+      iconSrc: '/upload.svg',
       iconAlt: 'upload-project',
       bgColor: '#86F49C',
-      onClick: onProjectUpload,
+      onClick: onProjectImport,
     },
     {
       title: 'New project',

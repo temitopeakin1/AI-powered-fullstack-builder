@@ -50,10 +50,15 @@ ${file.content}
     id: generateId(),
   };
 
-  const userMessage: Message = {
+  const userMessage = {
     role: 'user',
     id: generateId(),
-    content: `Import the "${folderName}" folder`,
+    content: [
+      {
+        type: 'text',
+        text: `Import the "${folderName}" folder`,
+      },
+    ],
     createdAt: new Date(),
   };
 
@@ -63,5 +68,5 @@ ${file.content}
     messages.push(commandsMessage);
   }
 
-  return messages;
+  return messages as Message[];
 };

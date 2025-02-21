@@ -1,0 +1,47 @@
+import { useState } from 'react';
+import { Form } from '@remix-run/react';
+import CloseButton from '../../../components/common/closeButton';
+import { ProjectImportProps } from '~/backOffice/types/project';
+import { ImportFolderButton } from '~/ai/components/ImportFolderButton';
+import { setProjectImportName } from '~/ai/lib/stores/chat';
+
+export default function ProjectImport({ closeModal}: ProjectImportProps) {
+  const [projectNameRef, setProjectNameRef] = useState("");
+
+  return (
+    <div className="fixed inset-0 flex items-center justify-center backdrop-blur-[5px] z-50">
+      <div className="w-[488px] h-auto bg-black bg-[linear-gradient(0deg,_rgba(0,_0,_0,_0.048)_0%,_rgba(31,_31,_31,_0.8)_100%)] border border-[#2E2E2E] border-image-slice-1] rounded-[8px] pt-6 px-4 py-3 md:py-6 px-4">
+        <div className="flex justify-between items-center -mt-1 -md:mt-2 ">
+          <div className="flex flex-col gap-1">
+            <span className="font-inter text-lg text-white font-medium leading-relaxed">Upload Project</span>
+          </div>
+          <CloseButton closeModal={closeModal} />
+        </div>
+        <>
+          <div className="flex flex-col items-center mt-1 gap-4">
+            <Form method="post" action="post" className="flex flex-col gap-3 items-center rounded-[8px] p-3 ">
+              <div className="relative w-[456px] h-[73px]">
+                <input
+                  type="text"
+                  name="title"
+                  id="title"
+                  placeholder="Give a title"
+                  value={projectNameRef}
+                  onChange={(e) => {
+                    setProjectImportName(e.target.value)
+                    setProjectNameRef(e.target.value)}}
+                  className="w-full h-full bg-transparent font-inter text-white placeholder-white bg-[linear-gradient(0deg,_rgba(0,_0,_0,_0.048)_0%,_rgba(31,_31,_31,_0.8)_100%)] border border-[#2E2E2E] border-image-slice-1 backdrop-[blur(50px)] rounded-md focus:outline-none px-4 text-base group"
+                />
+              </div>
+            </Form>
+            {/* not passing importChat here because importing "useChatHistory" in this file will break the app - Error when evaluating SSR module path-browserify */}
+            {/* so the component renders here, but once clicked it will actually forward to the one from the SideMenu that has all the functionality */}
+            <ImportFolderButton
+              className="w-full h-[41px] rounded-[500px] border border-[#2E2E2E] px-6 py-2 bg-[#86F49C] text-[#010101] text-sm flex items-center justify-center gap-2"
+            />
+          </div>
+        </>
+      </div>
+    </div>
+  );
+}
