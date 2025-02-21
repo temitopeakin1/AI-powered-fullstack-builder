@@ -30,6 +30,7 @@ import ignore from 'ignore';
 import { Header } from '~/components/common/Header/Header';
 import { uploadChatMessages } from '~/ai/lib/stores/projects/chat';
 import { backendApiFetch } from '~/ai/lib/backend-api';
+import ErrorTooLongDialog from '~/ai/components/ErrorToLongDialog';
 
 interface FileData {
   type: 'file' | 'folder';
@@ -169,7 +170,6 @@ const logger = createScopedLogger('Chat');
 
 export function Chat() {
   renderLogger.trace('Chat');
-
   const { ready, initialMessages, storeMessageHistory, importChat, exportChat } = useChatHistory();
   const title = useStore(description);
   useEffect(() => {
@@ -261,12 +261,13 @@ interface ChatProps {
   importChat: (description: string, messages: Message[]) => Promise<void>;
   exportChat: () => void;
   description?: string;
+
 }
 
 export const ChatImpl = memo(
   ({ description, initialMessages, storeMessageHistory, importChat, exportChat }: ChatProps) => {
     useShortcuts();
-
+    const [showPromptTooLongDialog, setShowPromptTooLongDialog] = useState(false);
     const textareaRef = useRef<HTMLTextAreaElement>(null);
     const [chatStarted, setChatStarted] = useState(initialMessages?.length > 0 || false);
     const [uploadedFiles, setUploadedFiles] = useState<File[]>([]); // Move here
@@ -301,10 +302,17 @@ export const ChatImpl = memo(
       sendExtraMessageFields: true,
       onError: (error) => {
         logger.error('Request failed\n\n', error);
-        toast.error(
-          'There was an error processing your request: ' + (error.message ? error.message : 'No details were returned'),
-        );
+        const parsedError = JSON.parse(error.message);
+        if (parsedError.message === 'Prompt too long.') {
+          setShowPromptTooLongDialog(true);
+        } else {
+          toast.error(
+            'There was an error processing your request: ' +
+            (error.message ? error.message : 'No details were returned'),
+          );
+        }
       },
+
       onFinish: (message, response) => {
         const usage = response?.usage;
 
@@ -319,6 +327,17 @@ export const ChatImpl = memo(
       initialMessages,
       initialInput: Cookies.get(PROMPT_COOKIE_KEY) || '',
     });
+
+
+    const handleClose = () => {
+      setShowPromptTooLongDialog(false);
+    };
+
+    const handleEdit = () => {
+      // De exemplu: setInput(''); sau altceva
+      setShowPromptTooLongDialog(false);
+    };
+
 
     const filterMessages = (messages: Message[]) =>
       messages.reduce(
@@ -341,14 +360,14 @@ export const ChatImpl = memo(
             const isLastUser = !messages.slice(index + 1).some((m) => m.role === 'user');
             const modifiedContent = Array.isArray(message?.content)
               ? message.content.map((contentItem: { type: string; text: string }) => {
-                if (contentItem.type === 'text') {
-                  return {
-                    ...contentItem,
-                    text:
-                      contentItem.text.replace('Current Message:\n\n', `Previous Message #${currentIndex}:\n\n`) +
-                      (isLastUser ? '\n\n(Assistant response below)' : '\n\n(Assistant response omitted)'),
-                  };
-                }
+                  if (contentItem.type === 'text') {
+                    return {
+                      ...contentItem,
+                      text:
+                        contentItem.text.replace('Current Message:\n\n', `Previous Message #${currentIndex}:\n\n`) +
+                        (isLastUser ? '\n\n(Assistant response below)' : '\n\n(Assistant response omitted)'),
+                    };
+                  }
 
                 return contentItem;
               })
@@ -928,6 +947,12 @@ export const ChatImpl = memo(
           setImageDataList={setImageDataList}
           actionAlert={actionAlert}
           clearAlert={() => workbenchStore.clearAlert()}
+        />
+
+        <ErrorTooLongDialog
+          isOpen={showPromptTooLongDialog}
+          onEdit={handleEdit}
+          onClose={handleClose}
         />
       </div>
     );

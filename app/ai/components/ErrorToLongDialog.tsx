@@ -60,7 +60,7 @@ const ErrorTooLongDialog: FC<ErrorTooLongDialogProps> = ({ isOpen, onEdit, onClo
 
         <RadixDialog.Content asChild>
           <motion.div
-            onClick={(e) => e.stopPropagation()} // Prevent click events from bubbling to the overlay
+            onClick={(e) => e.stopPropagation()} // previne închiderea când dai click în interior
             className="fixed too-much-text top-[50%] left-[50%] py-[24px] z-50 max-h-[85vh] w-[90%] xl:w-[847px] translate-x-[-50%] translate-y-[-50%] rounded-lg bg-biela-elements-background-depth-2 shadow-lg focus:outline-none overflow-hidden"
             style={{
               borderRadius: '12px',
@@ -72,8 +72,6 @@ const ErrorTooLongDialog: FC<ErrorTooLongDialogProps> = ({ isOpen, onEdit, onClo
             exit="closed"
             variants={dialogVariants}
           >
-
-
             {/* Decorative ellipse */}
             <div
               style={{
@@ -96,34 +94,26 @@ const ErrorTooLongDialog: FC<ErrorTooLongDialogProps> = ({ isOpen, onEdit, onClo
               className="absolute border border-white/25 top-4 right-4 w-6 h-6 flex items-center justify-center rounded-full bg-black/20 hover:bg-black/30 transition-colors duration-200"
               aria-label="Close dialog"
             >
-              <img src={close} alt="" />
+              <img src={close} alt="Close" />
             </button>
 
             <div className="p-6 grid xl:flex items-center gap-8 xl:gap-2">
               <div className="flex justify-center">
-                <img src={dizzy} alt="" className="mt-1 w-16 xl:w-8" />
+                <img src={dizzy} alt="Dizzy icon" className="mt-1 w-16 xl:w-8" />
               </div>
-              <h2
-                className="_textWeight_ybcgn_45 text-white text-[18px] xl:text-[30px] not-italic font-semibold leading-[30px] xl:leading-[56px]"
-              >
-            <div className="px-6 pb-6 flex items-center gap-2">
-              <img src={dizzy} alt=""  className="mt-1"/>
-              <h2 className="_textWeight_u905f_45 text-white text-[30px] not-italic font-semibold leading-[56px]">
-                Whoa, That's a Lot of Text!
-              </h2>
-            </div>
-
-            <div className="px-6 pb-6">
-              <p className="font-inter font-light text-white text-base xl:text-[20px] not-italic leading-normal">
-                Looks like your message is too big to send all at once! Try breaking it into
-                smaller parts and sending them separately.
-              </p>
+              <div>
+                <h2 className="text-white text-[30px] font-semibold leading-[56px]">
+                  Whoa, That's a Lot of Text!
+                </h2>
+                <p className="font-inter font-light text-white text-base xl:text-[20px] mt-4 leading-normal">
+                  Looks like your message is too big to send all at once!
+                  Try breaking it into smaller parts and sending them separately.
+                </p>
+              </div>
             </div>
 
             <div className="px-6 pb-6 bg-bolt-elements-background-depth-2">
               <button
-                onClick={onClose}
-                className="inline-flex items-center justify-center rounded-[500px] px-5 py-5 md:px-6 md:py-4 text-lg text-white leading-none focus:outline-none border border-[#777] md:min-w-[190px] w-full md:w-auto bg-[#030303] hover:bg-biela-elements-button-secondary-backgroundHover"
                 onClick={onEdit}
                 className="inline-flex items-center justify-center rounded-[500px] px-5 py-5 md:px-6 md:py-4 text-lg text-white leading-none focus:outline-none border border-[#777] md:min-w-[190px] w-full md:w-auto bg-[#030303] hover:bg-biela-elements-button-secondary-backgroundHover"
               >
