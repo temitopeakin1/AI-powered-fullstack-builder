@@ -30,16 +30,13 @@ import { Menu } from './Menu.client';
 import NewBgBiela from '~/assets/icons/new-biela.png';
 import MagicIcon from '../../assets/icons/magicIcon.svg';
 import { createScopedLogger } from '~/utils/logger';
-import CleanUpIcon from '~/assets/icons/refresh.svg';
 import ChatSuggestion from '~/ai/components/ChatSuggestion';
 import CheckList from '~/assets/icons/checkList';
 import { chatStore, setCheckingList, setCleaningProject, setShowPrompt } from '~/ai/lib/stores/chat';
 import { useStore } from '@nanostores/react';
-import { createScopedLogger } from '~/utils/logger';
 import CleanUpIcon from '~/assets/icons/refresh.svg';
 import { useParams } from '@remix-run/react';
 import {backendApiFetch} from "~/ai/lib/backend-api";
-import TemplatesSlider from './TemplatesSlider';
 
 const TEXTAREA_MIN_HEIGHT = 76;
 
@@ -593,7 +590,7 @@ export const BaseChat = React.forwardRef<HTMLDivElement, BaseChatProps>(
                         />
                       )}
                     </div>
-                    
+
                     <div className="w-100% h-full rotate-full">
                       <FilePreview
                         files={uploadedFiles}
@@ -828,7 +825,7 @@ export const BaseChat = React.forwardRef<HTMLDivElement, BaseChatProps>(
                           </ClientOnly>
                         </div>
                       </div>
-                      
+
                     </div>
                   </div>
                 )}
@@ -844,19 +841,16 @@ export const BaseChat = React.forwardRef<HTMLDivElement, BaseChatProps>(
 
                 handleSendMessage?.(event, messageInput);
               })}
-         
-              <TemplatesSlider/>
-          
-              
+
             {!chatStarted && <CopyRighting />}
-            
+
           </div>
 
           {/* @ts-ignore */}
           <ClientOnly>{() => <Workbench chatStarted={chatStarted} isStreaming={isStreaming} />}</ClientOnly>
-          
+
         </div>
-        
+
       </div>
     );
 
