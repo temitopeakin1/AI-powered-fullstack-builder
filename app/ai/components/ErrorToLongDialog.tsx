@@ -99,12 +99,15 @@ const ErrorTooLongDialog: FC<ErrorTooLongDialogProps> = ({ isOpen, onEdit, onClo
 
             <div className="p-6 grid xl:flex items-center gap-8 xl:gap-2">
               <div className="flex justify-center">
-                <img src={dizzy} alt="Dizzy icon" className="mt-1 w-16 xl:w-8" />
               </div>
               <div>
-                <h2 className="text-white text-[30px] font-semibold leading-[56px]">
-                  Whoa, That's a Lot of Text!
-                </h2>
+                <div className="grid justify-items-center md:flex items-center gap-4 xl:gap-2">
+                  <img src={dizzy} alt="Dizzy icon" className="mt-1 w-16 xl:w-8" />
+
+                  <h2 className="_textWeight_ybcgn_45 text-white text-[25px] xl:text-[30px] font-semibold xl:leading-[56px]">
+                    Whoa, That's a Lot of Text!
+                  </h2>
+                </div>
                 <p className="font-inter font-light text-white text-base xl:text-[20px] mt-4 leading-normal">
                   Looks like your message is too big to send all at once!
                   Try breaking it into smaller parts and sending them separately.
