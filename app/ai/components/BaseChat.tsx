@@ -38,6 +38,7 @@ import { useStore } from '@nanostores/react';
 import { createScopedLogger } from '~/utils/logger';
 import CleanUpIcon from '~/assets/icons/refresh.svg';
 import { useParams } from '@remix-run/react';
+import TemplatesSlider from './TemplatesSlider';
 
 const TEXTAREA_MIN_HEIGHT = 76;
 
@@ -500,6 +501,7 @@ export const BaseChat = React.forwardRef<HTMLDivElement, BaseChatProps>(
                         />
                       )}
                     </div>
+                    
                     <div className="w-100% h-full rotate-full">
                       <FilePreview
                         files={uploadedFiles}
@@ -737,6 +739,7 @@ export const BaseChat = React.forwardRef<HTMLDivElement, BaseChatProps>(
                           </ClientOnly>
                         </div>
                       </div>
+                      
                     </div>
                   </div>
                 )}
@@ -752,12 +755,19 @@ export const BaseChat = React.forwardRef<HTMLDivElement, BaseChatProps>(
 
                 handleSendMessage?.(event, messageInput);
               })}
+         
+              <TemplatesSlider/>
+          
+              
             {!chatStarted && <CopyRighting />}
+            
           </div>
 
           {/* @ts-ignore */}
           <ClientOnly>{() => <Workbench chatStarted={chatStarted} isStreaming={isStreaming} />}</ClientOnly>
+          
         </div>
+        
       </div>
     );
 
