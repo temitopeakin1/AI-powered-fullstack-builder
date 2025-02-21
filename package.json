@@ -96,6 +96,7 @@
     "react-dom": "^18.3.1",
     "react-hotkeys-hook": "^4.6.1",
     "react-markdown": "^9.0.3",
+    "react-qr-code": "^2.0.15",
     "react-resizable-panels": "^2.1.7",
     "react-scroll-to-bottom": "^4.2.0",
     "react-select": "^5.10.0",
