@@ -513,7 +513,7 @@ export const BaseChat = React.forwardRef<HTMLDivElement, BaseChatProps>(
                   <div
                     style={{ zIndex: '1', '--rotaion-variable': `${rotation}deg` }}
                     className={classNames(
-                      `${(actionAlert?.type === 'preview' || actionAlert?.type === 'migration') && 'chat-on-error'} backdrop-blur-[15px] transition-all flex flex-col place-items-center align-items-center justify-center rounded-lg relative w-full max-w-chat mx-auto z-prompt base-chat`,
+                      `${(actionAlert?.type === 'preview' || actionAlert?.type === 'migration' || actionAlert?.type === 'error') && 'chat-on-error'} backdrop-blur-[15px] transition-all flex flex-col place-items-center align-items-center justify-center rounded-lg relative w-full max-w-chat mx-auto z-prompt base-chat`,
                       {
                         'sticky bottom-2': chatStarted,
                         'chat-mode': mode === 'chat', // Add the chat-mode class when chat is active
@@ -523,7 +523,7 @@ export const BaseChat = React.forwardRef<HTMLDivElement, BaseChatProps>(
                     {/*<div className={'loop-border'}></div>*/}
                     {chatStarted && <TokenRemaining isStreaming={isStreaming} />}
                     <div className={classNames(styles.containerUnitTesting, 'w-full')}>
-                      {((actionAlert?.type === 'error' && isStreaming) || actionAlert?.type === 'migration') && (
+                      {((actionAlert?.type === 'error' && isStreaming) || (actionAlert?.type === 'preview' && isStreaming) || actionAlert?.type === 'migration') && (
                         <ChatAlert
                           alert={actionAlert}
                           clearAlert={() => clearAlert?.()}
