@@ -136,7 +136,7 @@ export class UserStore {
       refreshTokenExpiresAt = new Date();
 
     user.tokenExpiresAt = add(tokenExpiresAt, {
-      minutes: expirationSettings.tokenExpirationMinutes,
+      days: expirationSettings.tokenExpirationMinutes, // hot/temp fix session expires
     });
     user.refreshTokenExpiresAt = add(refreshTokenExpiresAt, {
       days: expirationSettings.refreshTokenExpirationDays,
