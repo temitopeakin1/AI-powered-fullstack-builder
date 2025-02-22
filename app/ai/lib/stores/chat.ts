@@ -42,17 +42,16 @@ export function setShowPrompt(showPrompt: boolean) {
   chatStore.setKey('showPrompt', showPrompt);
 }
 
-export function setCheckingList(checkingList: false | true) {
+export function setCheckingList(checkingList: boolean) {
   chatStore.setKey('checkingList', checkingList);
 }
 
-export function setCleaningProject(cleaningProject: false | true) {
+export function setCleaningProject(cleaningProject: boolean) {
   chatStore.setKey('cleaningProject', cleaningProject);
 }
-export function setErrorDetails(errorDetails: false | true) {
+export function setErrorDetails(errorDetails: boolean) {
   chatStore.setKey('errorDetails', errorDetails);
 }
 export function setProjectImportName(projectImportName: string) {
   chatStore.setKey('projectImportName', projectImportName);
 }
-

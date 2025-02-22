@@ -3,16 +3,12 @@ import { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Panel, PanelGroup, PanelResizeHandle } from 'react-resizable-panels';
 import {
   CodeMirrorEditor,
-  type EditorDocument,
   type EditorSettings,
   type OnChangeCallback as OnEditorChange,
-  type OnSaveCallback as OnEditorSave,
   type OnScrollCallback as OnEditorScroll,
 } from '../../components/CodeMirrorEditor';
 import { PanelHeader } from '~/ai/components/PanelHeader';
 import { PanelHeaderButton } from '~/ai/components/PanelHeaderButton';
-import type { FileMap } from '~/ai/lib/stores/files';
-import { themeStore } from '~/ai/lib/stores/theme';
 import { WORK_DIR } from '~/utils/constants';
 import { renderLogger } from '~/utils/logger';
 import { isMobile } from '~/utils/mobile';
@@ -21,144 +17,169 @@ import { FileTree } from './FileTree';
 import { DEFAULT_TERMINAL_SIZE, TerminalTabs } from './terminal/TerminalTabs';
 import { workbenchStore } from '~/ai/lib/stores/workbench';
 import { IconButton } from '~/components/common/IconButton';
-
-interface EditorPanelProps {
-  files?: FileMap;
-  unsavedFiles?: Set<string>;
-  editorDocument?: EditorDocument;
-  selectedFile?: string | undefined;
-  isStreaming?: boolean;
-  onEditorChange?: OnEditorChange;
-  onEditorScroll?: OnEditorScroll;
-  onFileSelect?: (value?: string) => void;
-  onFileSave?: OnEditorSave;
-  onFileReset?: () => void;
-}
+import { toast } from 'react-toastify';
+import { chatStore } from '~/ai/lib/stores/chat';
 
 const DEFAULT_EDITOR_SIZE = 100 - DEFAULT_TERMINAL_SIZE;
 
 const editorSettings: EditorSettings = { tabSize: 2 };
 
-export const EditorPanel = memo(
-  ({
-    files,
-    unsavedFiles,
-    editorDocument,
-    selectedFile,
-    isStreaming,
-    onFileSelect,
-    onEditorChange,
-    onEditorScroll,
-    onFileSave,
-    onFileReset,
-  }: EditorPanelProps) => {
-    renderLogger.trace('EditorPanel');
+export const EditorPanel = memo(() => {
+  renderLogger.trace('EditorPanel');
 
-    const theme = useStore(themeStore);
-    const showTerminal = useStore(workbenchStore.showTerminal);
-    const lastSelectedFileRef = useRef<string | undefined>();
-    const [editable, setEditable] = useState<boolean>(!isStreaming && editorDocument !== undefined);
+  const showTerminal = useStore(workbenchStore.showTerminal);
+  const unsavedFiles = useStore(workbenchStore.unsavedFiles);
+  const editorDocument = useStore(workbenchStore.currentDocument);
+  const selectedFile = useStore(workbenchStore.selectedFile);
+  const { isStreaming } = chatStore.get();
 
-    const activeFileSegments = useMemo(() => {
-      if (!editorDocument) {
-        return undefined;
-      }
+  const lastSelectedFileRef = useRef<string | undefined>();
+  const [editable, setEditable] = useState<boolean>(!isStreaming && editorDocument !== undefined);
 
-      return editorDocument.filePath.split('/');
-    }, [editorDocument]);
+  const activeFileSegments = useMemo(() => {
+    if (!editorDocument) {
+      return undefined;
+    }
 
-    const activeFileUnsaved = useMemo(() => {
-      return editorDocument !== undefined && unsavedFiles?.has(editorDocument.filePath);
-    }, [editorDocument, unsavedFiles]);
+    return editorDocument.filePath.split('/');
+  }, [editorDocument]);
 
-    useEffect(() => {
+  const onEditorChange = useCallback<OnEditorChange>(
+    (update) => {
       if (isStreaming) {
-        lastSelectedFileRef.current = selectedFile;
+        return;
       }
-    }, [isStreaming, selectedFile]);
 
-    useEffect(() => {
-      setEditable(!isStreaming && editorDocument !== undefined);
-    }, [isStreaming, editorDocument]);
+      workbenchStore.setCurrentDocumentContent(update.content);
+    },
+    [isStreaming],
+  );
 
-    const handleFileSelect = useCallback(
-      (filePath: string | undefined) => {
-        if (isStreaming && filePath !== lastSelectedFileRef.current) {
-          return;
-        }
+  const onEditorScroll = useCallback<OnEditorScroll>(
+    (position) => {
+      workbenchStore.setCurrentDocumentScrollPosition(position);
+    },
+    [isStreaming],
+  );
 
-        if (!isStreaming) {
-          const scrollers = document.querySelectorAll('.cm-scroller');
-          scrollers.forEach((scroller) => {
-            scroller.scrollTop = 0;
-          });
-        }
+  const onFileSelect = useCallback(
+    (filePath: string | undefined) => {
+      if (isStreaming) {
+        return;
+      }
 
-        onFileSelect?.(filePath);
-      },
-      [isStreaming, onFileSelect],
-    );
+      workbenchStore.setSelectedFile(filePath);
+    },
+    [isStreaming],
+  );
 
-    return (
-      <PanelGroup direction="vertical">
-        <Panel defaultSize={showTerminal ? DEFAULT_EDITOR_SIZE : 100} minSize={20}>
-          <PanelGroup direction="horizontal">
-            <Panel defaultSize={20} minSize={10} collapsible>
-              <div className="flex flex-col border-r border-biela-elements-borderColor h-full editor-fonts">
-                <PanelHeader>
-                  <IconButton icon={'new-file'} size="sm" title="Files" />
-                  Files
-                </PanelHeader>
-                <FileTree
-                  className="h-full"
-                  files={files}
-                  hideRoot
-                  unsavedFiles={unsavedFiles}
-                  rootFolder={WORK_DIR}
-                  selectedFile={selectedFile}
-                  onFileSelect={handleFileSelect}
-                />
-              </div>
-            </Panel>
-            <PanelResizeHandle />
-            <Panel className="flex flex-col" defaultSize={80} minSize={20}>
-              <PanelHeader className="overflow-x-auto">
-                {activeFileSegments?.length && (
-                  <div className="flex items-center flex-1 text-sm">
-                    <FileBreadcrumb pathSegments={activeFileSegments} files={files} onFileSelect={onFileSelect} />
-                    {activeFileUnsaved && (
-                      <div className="flex gap-1 ml-auto -mr-1.5">
-                        <PanelHeaderButton onClick={onFileSave}>
-                          <div className="i-ph:floppy-disk-duotone" />
-                          Save
-                        </PanelHeaderButton>
-                        <PanelHeaderButton onClick={onFileReset}>
-                          <div className="i-ph:clock-counter-clockwise-duotone" />
-                          Reset
-                        </PanelHeaderButton>
-                      </div>
-                    )}
-                  </div>
-                )}
+  const onFileSave = useCallback(() => {
+    if (isStreaming) {
+      return;
+    }
+
+    workbenchStore.saveCurrentDocument().catch(() => {
+      toast.error('Failed to update file content');
+    });
+  }, [isStreaming]);
+
+  const onFileReset = useCallback(() => {
+    if (isStreaming) {
+      return;
+    }
+
+    workbenchStore.resetCurrentDocument();
+  }, [isStreaming]);
+
+  const activeFileUnsaved = useMemo(
+    () => editorDocument !== undefined && unsavedFiles?.has(editorDocument.filePath),
+    [editorDocument, unsavedFiles],
+  );
+
+  useEffect(() => {
+    if (isStreaming) {
+      lastSelectedFileRef.current = selectedFile;
+    }
+  }, [isStreaming, selectedFile]);
+
+  useEffect(() => {
+    setEditable(!isStreaming && editorDocument !== undefined);
+  }, [isStreaming, editorDocument]);
+
+  const handleFileSelect = useCallback(
+    (filePath: string | undefined) => {
+      if (isStreaming && filePath !== lastSelectedFileRef.current) {
+        return;
+      }
+
+      if (!isStreaming) {
+        const scrollers = document.querySelectorAll('.cm-scroller');
+        scrollers.forEach((scroller) => {
+          scroller.scrollTop = 0;
+        });
+      }
+
+      onFileSelect?.(filePath);
+    },
+    [isStreaming, onFileSelect],
+  );
+
+  return (
+    <PanelGroup direction="vertical">
+      <Panel defaultSize={showTerminal ? DEFAULT_EDITOR_SIZE : 100} minSize={20}>
+        <PanelGroup direction="horizontal">
+          <Panel defaultSize={20} minSize={10} collapsible>
+            <div className="flex flex-col border-r border-biela-elements-borderColor h-full editor-fonts">
+              <PanelHeader>
+                <IconButton icon={'new-file'} size="sm" title="Files" />
+                Files
               </PanelHeader>
-              <div className="h-full flex-1 overflow-hidden">
-                <CodeMirrorEditor
-                  theme={theme}
-                  editable={editable}
-                  settings={editorSettings}
-                  doc={editorDocument}
-                  autoFocusOnDocumentChange={!isMobile()}
-                  onScroll={onEditorScroll}
-                  onChange={onEditorChange}
-                  onSave={onFileSave}
-                />
-              </div>
-            </Panel>
-          </PanelGroup>
-        </Panel>
-        <PanelResizeHandle />
-        <TerminalTabs />
-      </PanelGroup>
-    );
-  },
-);
+              <FileTree
+                className="h-full"
+                hideRoot
+                rootFolder={WORK_DIR}
+                selectedFile={selectedFile}
+                onFileSelect={handleFileSelect}
+              />
+            </div>
+          </Panel>
+          <PanelResizeHandle />
+          <Panel className="flex flex-col" defaultSize={80} minSize={20}>
+            <PanelHeader className="overflow-x-auto">
+              {activeFileSegments?.length && (
+                <div className="flex items-center flex-1 text-sm">
+                  <FileBreadcrumb pathSegments={activeFileSegments} onFileSelect={onFileSelect} />
+                  {activeFileUnsaved && (
+                    <div className="flex gap-1 ml-auto -mr-1.5">
+                      <PanelHeaderButton onClick={onFileSave}>
+                        <div className="i-ph:floppy-disk-duotone" />
+                        Save
+                      </PanelHeaderButton>
+                      <PanelHeaderButton onClick={onFileReset}>
+                        <div className="i-ph:clock-counter-clockwise-duotone" />
+                        Reset
+                      </PanelHeaderButton>
+                    </div>
+                  )}
+                </div>
+              )}
+            </PanelHeader>
+            <div className="h-full flex-1 overflow-hidden">
+              <CodeMirrorEditor
+                editable={editable}
+                settings={editorSettings}
+                doc={editorDocument}
+                autoFocusOnDocumentChange={!isMobile()}
+                onScroll={onEditorScroll}
+                onChange={onEditorChange}
+                onSave={onFileSave}
+              />
+            </div>
+          </Panel>
+        </PanelGroup>
+      </Panel>
+      <PanelResizeHandle />
+      <TerminalTabs />
+    </PanelGroup>
+  );
+});

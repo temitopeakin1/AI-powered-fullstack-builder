@@ -1,6 +1,7 @@
-import { FC, UIEvent } from 'react';
+import { FC, type ReactNode, UIEvent } from 'react';
 import { Dialog, DialogButton, DialogDescription, DialogRoot, DialogTitle } from './Dialog';
 import { capitalize } from 'lodash';
+import { LoadingOverlay } from '~/ai/components/LoadingOverlay';
 
 export enum DialogConfirmationType {
   DELETE = 'delete',
@@ -10,6 +11,7 @@ export enum DialogConfirmationType {
   FORK = 'form',
   ROLLBACK = 'rollback',
   SAVE = 'save',
+  RESTORE = 'restore',
 }
 
 interface ConfirmationDialogProps {
@@ -18,14 +20,30 @@ interface ConfirmationDialogProps {
   description: string;
   onConfirm: (event: UIEvent) => Promise<void> | void;
   onCancel: () => void;
+  isLoading?: boolean;
+  content?: ReactNode;
+  containerClassName?: string;
 }
 
-const ConfirmationDialog: FC<ConfirmationDialogProps> = ({ isOpen, type, description, onConfirm, onCancel }) => {
+export const emptyConfirmationDialogHandler = Object.fromEntries(
+  Object.values(DialogConfirmationType).map((type) => [type, () => {}]),
+) as Record<DialogConfirmationType, () => void>;
+
+const ConfirmationDialog: FC<ConfirmationDialogProps> = ({
+  isOpen,
+  type,
+  description,
+  onConfirm,
+  onCancel,
+  isLoading,
+  content,
+  containerClassName,
+}) => {
   const chatTypes = [DialogConfirmationType.FORK, DialogConfirmationType.DELETE, DialogConfirmationType.SAVE];
 
   return (
     <DialogRoot open={isOpen}>
-      <Dialog onBackdrop={onCancel} onClose={onCancel}>
+      <Dialog onBackdrop={onCancel} onClose={onCancel} className={containerClassName}>
         <DialogTitle>
           {capitalize(type)} {chatTypes.includes(type) ? 'Chat' : 'Message'}
         </DialogTitle>
@@ -34,6 +52,7 @@ const ConfirmationDialog: FC<ConfirmationDialogProps> = ({ isOpen, type, descrip
             <p>
               You are about to {type} <strong>{description}</strong>.
             </p>
+            {content}
             <p className="mt-4"> Are you sure you want to {type} this chat?</p>
           </div>
         </DialogDescription>
@@ -41,8 +60,15 @@ const ConfirmationDialog: FC<ConfirmationDialogProps> = ({ isOpen, type, descrip
           <DialogButton type="secondary" onClick={onCancel}>
             Cancel
           </DialogButton>
-          <DialogButton type="danger" onClick={onConfirm}>
-            {capitalize(type)}
+          <DialogButton type="danger" disabled={isLoading} onClick={onConfirm}>
+            <>
+              {capitalize(type)}
+              {isLoading && (
+                <LoadingOverlay
+                  message={`Please wait while we ${type} the ${chatTypes.includes(type) ? 'chat' : 'messages'}.`}
+                />
+              )}
+            </>
           </DialogButton>
         </div>
       </Dialog>

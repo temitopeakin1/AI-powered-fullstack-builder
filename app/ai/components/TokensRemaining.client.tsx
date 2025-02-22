@@ -1,8 +1,8 @@
 import React, { useEffect, useState } from 'react';
 import { ClientOnly } from 'remix-utils/client-only';
 import { useNavigate } from '@remix-run/react';
-import { TokensSession, TokensStore } from '../lib/stores/tokens/tokensStore';
-import { workbenchStore } from '../lib/stores/workbench';
+import { TokensSession, TokensStore } from '~/ai/lib/stores/tokens/tokensStore';
+import { workbenchStore } from '~/ai/lib/stores/workbench';
 
 const TokenRemaining = ({ isStreaming }: { isStreaming: boolean }) => {
   const [remainingTokens, setRemainingTokens] = useState<number | null>(null);
@@ -23,11 +23,7 @@ const TokenRemaining = ({ isStreaming }: { isStreaming: boolean }) => {
   async function refreshTokens() {
     const data = await tokensStore.refreshTokensData();
 
-    if (data) {
-      setRemainingTokens(data.remainingTokens);
-      setProjectTokens(data.projectTokens);
-      setFreePromptsRemaining(data.freeTokensRemaining);
-    }
+    tokensStoreCallback(data);
   }
 
   useEffect(() => {

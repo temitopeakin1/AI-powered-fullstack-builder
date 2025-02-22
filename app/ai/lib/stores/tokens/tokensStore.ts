@@ -1,6 +1,6 @@
 // tokensStore.ts
-import { backendApiFetch } from '../../backend-api';
-import { workbenchStore } from '../workbench';
+import { backendApiFetch } from '~/ai/lib/backend-api';
+import { workbenchStore } from '~/ai/lib/stores/workbench';
 
 // Define the shape of the tokens data we wish to store
 export interface TokensSession {
@@ -24,11 +24,11 @@ export class TokensStore {
   }
 
   getRemainingTokens(): number | null {
-    return this._tokensData.remainingTokens;
+    return this._tokensData?.remainingTokens ?? null;
   }
 
   getProjectTokens(): number | null {
-    return this._tokensData.projectTokens;
+    return this._tokensData?.projectTokens ?? null;
   }
 
   async refreshTokensData(): Promise<TokensSession | void> {
@@ -44,7 +44,11 @@ export class TokensStore {
         },
       });
 
-      const data = await response.json();
+      const data = (await response.json()) as {
+        userBalance: number;
+        projectTokensConsumed: number;
+        freePromptsRemaining: number;
+      };
 
       const tokensSession: TokensSession = {
         remainingTokens: data.userBalance,
@@ -57,6 +61,8 @@ export class TokensStore {
       return tokensSession;
     } catch (error) {
       console.error('Error refreshing tokens data:', error);
+
+      return void 0;
     }
   }
 

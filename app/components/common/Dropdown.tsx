@@ -2,16 +2,22 @@ import React, { useEffect, useRef, useState } from 'react';
 import ArrowDown from '~/assets/icons/arrowIcon.svg';
 import SearchIcon from '~/assets/icons/searchIcon.svg';
 
+export interface DropdownItems {
+  label: string;
+  value: string | number;
+  icon?: string;
+}
+
 interface IBasicDropdown<T> {
   value?: T | string;
-  items: { label: string; value: string | number; icon?: string }[];
+  items: DropdownItems[];
   disabled: boolean;
-  onSelect: (arg: T | { label: string; value: string | number; icon?: string }) => void;
+  onSelect: (arg: T | DropdownItems) => void;
   label?: string;
   placeholder?: string;
 }
 
-export type DropdownData = string | { label: string; value: string | number; icon?: string };
+export type DropdownData = string | DropdownItems;
 
 export default function Dropdown<T extends DropdownData>({
   value,
@@ -37,16 +43,18 @@ export default function Dropdown<T extends DropdownData>({
       if (parentRef.current && parentRef.current.contains(event.target as Node)) {
         return;
       }
+
       setExpanded(false);
     };
 
     document.addEventListener('mousedown', handleClickOutside);
+
     return () => {
       document.removeEventListener('mousedown', handleClickOutside);
     };
   }, []);
 
-  function handleSelect(item: T | { label: string; value: string | number; icon?: string }, event: React.MouseEvent) {
+  function handleSelect(item: T | DropdownItems, event: React.MouseEvent) {
     event.preventDefault();
     event.stopPropagation();
     setSelection(item);
@@ -125,7 +133,8 @@ export default function Dropdown<T extends DropdownData>({
       {isExpanded && (
         <div
           ref={dropdownRef}
-          className={`absolute top-[100%] left-0 mt-[8px] p-[12px] max-h-fit z-20 opacity-100 visible border border-[#394142] rounded-[8px]`}
+          // TODO: update scroll design
+          className={`${filteredItems.length > 3 ? 'overflow-y-scroll' : ''} z-max max-h-[200px] absolute top-[100%] left-0 mt-[8px] p-[12px] opacity-100 visible border border-[#394142] rounded-[8px]`}
           style={{
             width: `${dropdownWidth}px`,
             background: 'linear-gradient(0deg, rgba(0, 0, 0, 0.05) 0%, rgba(31, 31, 31, 0.80) 51.22%)',
@@ -151,12 +160,12 @@ export default function Dropdown<T extends DropdownData>({
             </div>
           ) : null}
           <div className={'flex flex-col gap-[8px] pt-[16px] px-[8px] pb-[8px]'}>
-            {filteredItems?.length > 0 ? (
+            {!!filteredItems?.length ? (
               filteredItems.map((item) => (
                 <div
                   key={item.value}
                   className={`flex gap-[8px] p-[8px] cursor-pointer rounded-[8px] ${(selection as { value: string | number }).value === item.value ? 'border border-[#86F49C]' : ''}`}
-                  onClick={(e) => handleSelect(item, e)}
+                  onClick={(e: React.MouseEvent) => handleSelect(item, e)}
                 >
                   {item.icon && <img src={item.icon} alt={item.label} width={16} height={16} />}
                   <span className={'text-[14px] font-[Inter] uppercase text-white'}>{item.label}</span>
