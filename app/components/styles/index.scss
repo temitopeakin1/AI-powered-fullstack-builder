@@ -478,7 +478,12 @@ svg.device-btn-icon {
     transition: all 0.5s ease-in-out;
   }
 }
+.base-chat.chat-on-error {
+  &:after {
+    background: linear-gradient(var(--rotaion-variable), rgba(34,32,38,1) 20%, rgba(241,2,1,1) 30%, rgba(241,2,1,1) 100%) !important;
 
+  }
+}
 .base-chat {
   margin-top: 48px;
   margin-bottom: 0;

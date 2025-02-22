@@ -67,9 +67,9 @@ export function useChatHistory() {
               navigate(
                 {
                   pathname: window.location.pathname,
-                  search: newSearchParams.toString()
+                  search: newSearchParams.toString(),
                 },
-                { replace: true }
+                { replace: true },
               );
             }
           } else {

@@ -1,5 +1,5 @@
 import { backendApiFetch } from '~/ai/lib/backend-api';
-import { workbenchStore } from '../workbench';
+import { workbenchStore } from '~/ai/lib/stores/workbench';
 import { getCachedAppState, setAppData } from './cloud-storage';
 
 export async function getAppState(cached?: boolean) {
@@ -17,7 +17,7 @@ export async function getAppState(cached?: boolean) {
   const url = `/cloud/app/${projectSlug}`;
 
   if (projectSlug.includes('undefined')) {
-    return;
+    return null;
   }
 
   try {
@@ -33,15 +33,17 @@ export async function getAppState(cached?: boolean) {
 
     // console.log('app status:', data);
 
-    setAppData(data);
+    setAppData(projectSlug, data);
 
     return data;
   } catch (error) {
     if (error instanceof Error && error.message.includes('No logged-in user found')) {
-      return;
+      return null;
     }
 
     console.error('Error backendApiFetching app state:/', error);
+
+    return null;
   }
 }
 

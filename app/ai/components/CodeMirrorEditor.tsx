@@ -21,9 +21,11 @@ import { classNames } from '~/utils/classNames';
 import { debounce } from '~/utils/debounce';
 import { createScopedLogger, renderLogger } from '~/utils/logger';
 import { BinaryContent } from './BinaryContent';
-import { getTheme, reconfigureTheme } from '../../utils/cm-theme';
-import { indentKeyBinding } from '../../utils/indent';
-import { getLanguage } from '../../utils/languages';
+import { getTheme, reconfigureTheme } from '~/utils/cm-theme';
+import { indentKeyBinding } from '~/utils/indent';
+import { getLanguage } from '~/utils/languages';
+import { useStore } from '@nanostores/react';
+import { themeStore } from '~/ai/lib/stores/theme';
 
 const logger = createScopedLogger('CodeMirrorEditor');
 
@@ -59,7 +61,6 @@ export type OnScrollCallback = (position: ScrollPosition) => void;
 export type OnSaveCallback = () => void;
 
 interface Props {
-  theme: Theme;
   id?: unknown;
   doc?: EditorDocument;
   editable?: boolean;
@@ -125,12 +126,12 @@ export const CodeMirrorEditor = memo(
     onScroll,
     onChange,
     onSave,
-    theme,
     settings,
     className = '',
   }: Props) => {
     renderLogger.trace('CodeMirrorEditor');
 
+    const theme = useStore(themeStore);
     const [languageCompartment] = useState(new Compartment());
 
     const containerRef = useRef<HTMLDivElement | null>(null);
@@ -143,16 +144,16 @@ export const CodeMirrorEditor = memo(
     const onSaveRef = useRef(onSave);
 
     const [currentFilePath, setCurrentFilePath] = useState<string>('');
-    const [currentLanguageSupport, setCurrentLanguageSupport] = useState<any>();
 
     // Reset language support when the file changes.
     useEffect(() => {
       const newFileName = doc?.filePath;
+
       if (newFileName === currentFilePath) {
         return;
       }
+
       setCurrentFilePath(newFileName as string);
-      setCurrentLanguageSupport(undefined);
     }, [doc?.filePath]);
 
     useEffect(() => {
@@ -173,6 +174,7 @@ export const CodeMirrorEditor = memo(
         dispatchTransactions(transactions) {
           const previousSelection = view.state.selection;
           view.update(transactions);
+
           const newSelection = view.state.selection;
           const selectionChanged =
             newSelection !== previousSelection &&
@@ -200,6 +202,7 @@ export const CodeMirrorEditor = memo(
       if (!viewRef.current) {
         return;
       }
+
       viewRef.current.dispatch({
         effects: [reconfigureTheme(theme)],
       });
@@ -209,6 +212,7 @@ export const CodeMirrorEditor = memo(
       if (!viewRef.current) {
         return;
       }
+
       viewRef.current.dispatch({
         effects: [editableStateEffect.of(editable)],
       });
@@ -231,6 +235,7 @@ export const CodeMirrorEditor = memo(
         ]);
         view.setState(state);
         setNoDocument(view);
+
         return;
       }
 
@@ -245,6 +250,7 @@ export const CodeMirrorEditor = memo(
       getLanguage(doc.filePath).then((languageSupport) => {
         const langExtensions = languageSupport ? [languageSupport] : [];
         let state = editorStates.get(doc.filePath);
+
         if (!state) {
           state = newEditorState(doc.value, theme, settings, onScrollRef, debounceScroll, onSaveRef, [
             languageCompartment.of(langExtensions),
@@ -257,16 +263,8 @@ export const CodeMirrorEditor = memo(
             effects: [languageCompartment.reconfigure(langExtensions), reconfigureTheme(theme)],
           });
         }
-        setEditorDocument(
-          view,
-          theme,
-          editable,
-          languageCompartment,
-          autoFocusOnDocumentChange,
-          doc as TextEditorDocument,
-          currentLanguageSupport,
-          setCurrentLanguageSupport,
-        );
+
+        setEditorDocument({ view, doc });
       });
     }, [doc?.value, editable, doc?.filePath, autoFocusOnDocumentChange]);
 
@@ -300,6 +298,7 @@ function newEditorState(
           if (event.target !== view.scrollDOM) {
             return;
           }
+
           onScrollRef.current?.({ left: view.scrollDOM.scrollLeft, top: view.scrollDOM.scrollTop });
         }, debounceScroll),
         mousedown: (event, view) => {
@@ -309,10 +308,12 @@ function newEditorState(
             view.dispatch({
               effects: [readOnlyTooltipStateEffect.of(true)],
             });
+
             return true;
           } else {
             view.requestMeasure();
           }
+
           return false;
         },
         keydown: (event, view) => {
@@ -324,6 +325,7 @@ function newEditorState(
           } else {
             view.requestMeasure();
           }
+
           return false;
         },
       }),
@@ -363,7 +365,6 @@ function newEditorState(
       }),
       closeBrackets(),
       lineNumbers(),
-      // scrollPastEnd(),
       dropCursor(),
       drawSelection(),
       bracketMatching(),
@@ -378,6 +379,7 @@ function newEditorState(
         markerDOM: (open) => {
           const icon = document.createElement('div');
           icon.className = `fold-icon ${open ? 'i-ph-caret-down-bold' : 'i-ph-caret-right-bold'}`;
+
           return icon;
         },
       }),
@@ -398,17 +400,7 @@ function setNoDocument(view: EditorView) {
   view.scrollDOM.scrollTo(0, 0);
 }
 
-//TODO: Get rid of 'any' here?
-function setEditorDocument(
-  view: EditorView,
-  theme: Theme,
-  editable: boolean,
-  languageCompartment: Compartment,
-  autoFocus: boolean,
-  doc: TextEditorDocument,
-  currentLanguageSupport: any,
-  setCurrentLanguageSupport: any,
-) {
+function setEditorDocument({ view, doc }: { view: EditorView; doc: TextEditorDocument }) {
   const oldText = view.state.doc.toString();
   const newText = doc.value;
   const isAppending = oldText?.length && newText.length > oldText.length && newText.startsWith(oldText);
@@ -464,20 +456,20 @@ function getReadOnlyTooltip(state: EditorState) {
   if (!state.readOnly) {
     return [];
   }
+
   return state.selection.ranges
     .filter((range) => range.empty)
-    .map((range) => {
-      return {
-        pos: range.head,
-        above: true,
-        strictSide: true,
-        arrow: true,
-        create: () => {
-          const divElement = document.createElement('div');
-          divElement.className = 'cm-readonly-tooltip';
-          divElement.textContent = 'Cannot edit file while AI response is being generated';
-          return { dom: divElement };
-        },
-      };
-    });
+    .map((range) => ({
+      pos: range.head,
+      above: true,
+      strictSide: true,
+      arrow: true,
+      create: () => {
+        const divElement = document.createElement('div');
+        divElement.className = 'cm-readonly-tooltip';
+        divElement.textContent = 'Cannot edit file while AI response is being generated';
+
+        return { dom: divElement };
+      },
+    }));
 }

@@ -78,7 +78,7 @@ const invoices: Invoice[] = [
 export function InvoiceTable() {
   return (
     <div className="w-full overflow-x-auto mb-8 md:mb-24">
-      <table className="w-full text-sm text-left border-collapse">
+      <table className="w-full min-w-[800px] text-sm text-left border-collapse">
         <thead className="text-xs text-[#777777]">
           <tr>
             <th scope="col" className="py-4">

@@ -9,7 +9,10 @@ import { binDates } from '~/utils/date-binning';
 import { useSearchFilter } from '~/ai/lib/hooks/useSearchFilter';
 import '../../components/styles/menu.scss';
 import AnimationGif from '../../assets/icons/logo-animation.gif';
-import ConfirmationDialog, { DialogConfirmationType } from '~/ai/components/ConfirmationDialog';
+import ConfirmationDialog, {
+  DialogConfirmationType,
+  emptyConfirmationDialogHandler,
+} from '~/ai/components/ConfirmationDialog';
 import { ImportButtons } from './ImportButtons';
 
 const menuVariants: Variants = {
@@ -203,19 +206,11 @@ export const Menu: FC<MenuProps> = ({ open, setOpen, isStreaming }) => {
               onConfirm={(event) => {
                 if (dialogContent) {
                   const handler = {
+                    ...emptyConfirmationDialogHandler,
                     [DialogConfirmationType.DELETE]: () => deleteItem(event, dialogContent.item),
                     [DialogConfirmationType.DUPLICATE]: () => handleDuplicate(dialogContent.item.id),
                     [DialogConfirmationType.DOWNLOAD]: () => downloadProject(dialogContent.item.id),
                     [DialogConfirmationType.EXPORT]: () => exportChat(dialogContent.item.id),
-                    [DialogConfirmationType.FORK]: () => {
-                      //ignore
-                    },
-                    [DialogConfirmationType.ROLLBACK]: () => {
-                      //ignore
-                    },
-                    [DialogConfirmationType.SAVE]: () => {
-                      //ignore+
-                    },
                   };
 
                   handler[dialogContent.type]();

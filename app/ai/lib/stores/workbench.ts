@@ -20,6 +20,8 @@ import Cookies from 'js-cookie';
 import { createSampler } from '~/utils/sampler';
 import type { ActionAlert } from '~/types/actions';
 import { UserStore } from '~/ai/lib/stores/user/userStore';
+import { WORK_DIR } from '~/utils/constants';
+import ignore from 'ignore';
 
 export interface ArtifactState {
   id: string;
@@ -38,7 +40,7 @@ export type WorkbenchViewType = 'code' | 'preview';
 export class WorkbenchStore {
   #previewsStore = new PreviewsStore(webcontainer);
   #filesStore = new FilesStore(webcontainer);
-  #editorStore = new EditorStore(this.#filesStore);
+  #editorStore = new EditorStore();
   #terminalStore = new TerminalStore(webcontainer);
 
   #reloadedMessages = new Set<string>();
@@ -109,7 +111,7 @@ export class WorkbenchStore {
   }
 
   async executeScriptCommands(
-    scriptName: "start" | "stop" | "restart" | "test" | "build",
+    scriptName: 'start' | 'stop' | 'restart' | 'test' | 'build',
     fallback?: () => Promise<void>,
   ) {
     let scripts;
@@ -150,8 +152,7 @@ export class WorkbenchStore {
 
     for (const command of commands) {
       try {
-        await this.bielaTerminal.executeCommand(`${Date.now()}`, command, () => {
-        });
+        await this.bielaTerminal.executeCommand(`${Date.now()}`, command, () => {});
       } catch (error) {
         console.error('Error executing command:', error);
       }
@@ -165,16 +166,13 @@ export class WorkbenchStore {
   async startBielaTerminalServer() {
     await this.executeScriptCommands('start', async () => {
       try {
-        await this.bielaTerminal.executeCommand(`${Date.now()}`, 'npm install', () => {
-        });
-      }
-      catch (error) {
+        await this.bielaTerminal.executeCommand(`${Date.now()}`, 'npm install', () => {});
+      } catch (error) {
         console.error('Error starting biela terminal:', error);
       }
 
       try {
-        await this.bielaTerminal.executeCommand(`${Date.now()}`, 'npm run dev', () => {
-        });
+        await this.bielaTerminal.executeCommand(`${Date.now()}`, 'npm run dev', () => {});
       } catch (error) {
         console.error('Error starting biela terminal:', error);
       }
@@ -184,8 +182,7 @@ export class WorkbenchStore {
   async stopBielaTerminalServer() {
     await this.executeScriptCommands('stop', async () => {
       try {
-        await this.bielaTerminal.executeCommand(`${Date.now()}`, '', () => {
-        });
+        await this.bielaTerminal.executeCommand(`${Date.now()}`, '', () => {});
       } catch (error) {
         console.error('Error stopping biela terminal:', error);
       }
@@ -332,7 +329,7 @@ export class WorkbenchStore {
     }
   }
 
-  getFileModifcations() {
+  getFileModifications() {
     return this.#filesStore.getFileModifications();
   }
 
@@ -710,7 +707,6 @@ export class WorkbenchStore {
 
     const uniqueProjectId = `${metadata.chatId}-${user?.id}`;
 
-
     return uniqueProjectId.toLowerCase();
   }
 
@@ -720,15 +716,27 @@ export class WorkbenchStore {
       const zip = await JSZip.loadAsync(typedArray);
 
       const newFileMap: FileMap = {};
+      const ignorePatterns = [
+        'dist/**',
+        'build/**',
+        'node_modules/**',
+        '.git/**',
+        '.github/**',
+        '**/*lock.json',
+        '**/*lock.yaml',
+      ];
+
+      const ig = ignore().add(ignorePatterns);
 
       // Iterate over all files in the archive
       await Promise.all(
         Object.keys(zip.files).map(async (relativePath) => {
           const fileEntry = zip.files[relativePath];
 
-          if (!fileEntry.dir) {
+          if (!fileEntry.dir && !ig.ignores(relativePath)) {
             const content = await fileEntry.async('string');
-            newFileMap[relativePath] = {
+
+            newFileMap[`${WORK_DIR}/${relativePath}`] = {
               type: 'file',
               isBinary: false,
               content,
@@ -737,17 +745,29 @@ export class WorkbenchStore {
         }),
       );
 
-      this.setDocuments(newFileMap);
-      this.resetAllFileModifications();
+      this.#filesStore.files.set(newFileMap);
 
-      // Optionally select the first file, etc.
       const filePaths = Object.keys(newFileMap);
 
-      if (filePaths.length > 0) {
+      this.setDocuments(newFileMap);
+
+      this.unsavedFiles.set(new Set(filePaths));
+
+      await this.saveAllFiles();
+
+      this.resetAllFileModifications();
+
+      localStorage.setItem('fileTreeData', JSON.stringify(newFileMap));
+
+      if (filePaths.length) {
         this.setSelectedFile(filePaths[0]);
       }
+
+      return newFileMap;
     } catch (error) {
       console.error('Error loading downloaded project:', error);
+
+      return null;
     }
   }
 }

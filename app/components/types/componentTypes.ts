@@ -3,7 +3,7 @@ import React, { ReactNode, UIEvent } from 'react';
 export interface ActionCardProps {
   projectsCount: number;
   onCreateProjectClick: () => void;
-  onProjectUpload: () => void;
+  onProjectImport: () => void;
 }
 
 export interface HeaderProps {

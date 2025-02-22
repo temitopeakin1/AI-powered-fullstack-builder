@@ -5,7 +5,7 @@
 import { useStore } from '@nanostores/react';
 import type { JSONValue, Message } from 'ai';
 import { useChat } from 'ai/react';
-import React, { memo, UIEvent, useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import React, { memo, UIEvent, useCallback, useEffect, useRef, useState } from 'react';
 import { useAnimate } from 'framer-motion';
 import { cssTransition, toast, ToastContainer } from 'react-toastify';
 import { useSettings } from '~/ai/lib/hooks/useSettings';
@@ -275,8 +275,8 @@ export const ChatImpl = memo(
     const [fakeLoading, setFakeLoading] = useState(false);
     const files = useStore(workbenchStore.files);
     const actionAlert = useStore(workbenchStore.alert);
-    const { promptId, autoSelectTemplate, contextOptimizationEnabled } = useSettings();
-    const { showChat } = useStore(chatStore);
+    const { autoSelectTemplate, contextOptimizationEnabled } = useSettings();
+    const { showChat, isStreaming, mode } = useStore(chatStore);
     const [animationScope, animate] = useAnimate();
     const [apiKeys, setApiKeys] = useState<Record<string, string>>({});
     const { enhancingPrompt, promptEnhanced, enhancePrompt, resetEnhancer } = usePromptEnhancer();
@@ -294,7 +294,7 @@ export const ChatImpl = memo(
         files,
 
         // promptId,
-        mode: chatStore.get().mode,
+        mode,
         contextOptimization: contextOptimizationEnabled,
         projectSlug: workbenchStore.getSlug(),
       },
@@ -305,7 +305,7 @@ export const ChatImpl = memo(
           'There was an error processing your request: ' + (error.message ? error.message : 'No details were returned'),
         );
       },
-      onFinish: (message, response) => {
+      onFinish: (_, response) => {
         const usage = response?.usage;
 
         if (usage) {
@@ -366,12 +366,18 @@ export const ChatImpl = memo(
         [] as { role: string; id: string; content: string | { type: string; text: string }[] }[],
       );
 
-    useMemo(() => {
+    useEffect(() => {
       if (initialMessages.length === messages.length) {
         return;
       }
 
-      uploadChatMessages(messages).then();
+      (async () => {
+        try {
+          await uploadChatMessages(messages);
+        } catch (error) {
+          logger.error('Failed to upload chat messages', error);
+        }
+      })();
     }, [messages.length]);
 
     useEffect(() => {
@@ -402,18 +408,32 @@ export const ChatImpl = memo(
 
       const storedApiKeys = Cookies.get('apiKeys');
 
-      if (!storedApiKeys) {
-        return;
+      if (storedApiKeys) {
+        setApiKeys(JSON.parse(storedApiKeys));
       }
 
-      setApiKeys(JSON.parse(storedApiKeys));
+      const justConnected = localStorage.getItem('justConnectedSupabase');
+
+      if (justConnected === 'true') {
+        localStorage.removeItem('justConnectedSupabase');
+
+        setTimeout(() => {
+          workbenchStore.actionAlert.set({
+            type: 'database',
+            title: 'Database Creation',
+            description: 'Would you like to create a database for your project?',
+            content: 'Content',
+            source: 'preview',
+          });
+        }, 1000);
+      }
     }, []);
 
-    useMemo(() => {
-      setIsStreaming(isLoading);
-    }, [isLoading]);
-
     useEffect(() => {
+      if (isStreaming !== isLoading) {
+        setIsStreaming(isLoading);
+      }
+
       processSampledMessages({
         messages,
         initialMessages,
@@ -423,7 +443,7 @@ export const ChatImpl = memo(
       });
     }, [JSON.stringify(messages), isLoading, parseMessages]);
 
-    useMemo(() => {
+    useEffect(() => {
       const textarea = textareaRef.current;
 
       if (textarea) {
@@ -504,7 +524,7 @@ export const ChatImpl = memo(
        */
       await workbenchStore.saveAllFiles();
 
-      const fileModifications = workbenchStore.getFileModifcations();
+      const fileModifications = workbenchStore.getFileModifications();
 
       chatStore.setKey('aborted', false);
 
@@ -699,7 +719,7 @@ export const ChatImpl = memo(
             type: 'text',
             text: "When first creating a website, handle the copyright bar at the bottom of the footer as follows:\n\n1. If the user has specifically requested copyright content:\n- Implement only the user-requested copyright elements\n- Format them to blend naturally with the footer design\n\n2. If the user has NOT specified any copyright content:\n- Include a slim copyright bar (instead of any default copyright notice) at the very bottom that blends naturally with the footer design\n- This bar should be visually distinct but subtle, vertically compact with minimal padding ensuring it integrates harmoniously with the overall footer style\n- The copyright bar should contain the text: 'AI-powered development by Biela.dev, powered by TeachMeCode® Institute' in a way that complements the footer's typography and layout\n- Ensure it adapts seamlessly to the website's design language\n\nDo not include 'AI-powered development by Biela.dev, powered by TeachMeCode® Institute' if the user has provided their own copyright content - they are mutually exclusive.",
           },
-        ]
+        ],
       };
 
       const newMessage = {
@@ -725,13 +745,12 @@ export const ChatImpl = memo(
         content: [
           {
             type: 'text',
-            text: ` User is connected to Supabase: following the Mandatory Sequence is your core role now when dealing with databases. Use supabase connection credentials provided by user Project URL: ${localStorage.getItem('projectUrl')}, Anon Key: ${localStorage.getItem('annonKey')}`
+            text: ` User is connected to Supabase: following the Mandatory Sequence is your core role now when dealing with databases. Use supabase connection credentials provided by user Project URL: ${localStorage.getItem('projectUrl')}, Anon Key: ${localStorage.getItem('annonKey')}, always use type migration when you run it.`
           }
         ]
       } as any;
 
       const hasSupabaseCredentials = localStorage.getItem('projectUrl') && localStorage.getItem('annonKey');
-
 
       // Filter existing messages and add the import files at the start and the new message at the end
       const hasData =
@@ -739,8 +758,8 @@ export const ChatImpl = memo(
         (files && Object.keys(files).length > 0);
 
       const filteredMessages = [
-        ...(chatStore.get().mode === 'code' || hasData ? [importFiles, changedFiles] : []),
-        ...(chatStore.get().mode === 'chat' || hasData ? [] : [copyrightMessage]),
+        ...(mode === 'code' || hasData ? [importFiles, changedFiles] : []),
+        ...(mode === 'chat' || hasData ? [] : [copyrightMessage]),
         instructionMessage,
         ...(hasSupabaseCredentials ? [supabaseMessage] : []),
         ...filterMessages(messages),
@@ -776,24 +795,6 @@ export const ChatImpl = memo(
 
       textareaRef.current?.blur();
     };
-
-    useEffect(() => {
-
-      const justConnected = localStorage.getItem('justConnectedSupabase');
-      if (justConnected === 'true') {
-        localStorage.removeItem('justConnectedSupabase');
-
-        setTimeout(() => {
-          workbenchStore.actionAlert.set({
-            type: 'database',
-            title: 'Database Creation',
-            description: 'Would you like to create a database for your project?',
-            content: 'Content',
-            source: 'preview'
-          });
-        }, 1000);
-      }
-    }, []);
 
     /**
      * Handles the change event for the textarea and updates the input state.
