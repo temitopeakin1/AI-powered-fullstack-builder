@@ -283,9 +283,6 @@ export const Workbench = memo(({ chatStarted, isStreaming }: WorkspaceProps) => 
         const chat = await getMessages(db!, chatId.value!);
 
         await setMessages(db!, chat.id, restoredCommit.messages, chat.urlId, chat.description, chat.timestamp);
-
-        await storeMessageHistory(restoredCommit.messages);
-        workbenchStore.setReloadedMessages(restoredCommit.messages.map((m) => m.id));
       }
 
       workbenchStore.restartBielaTerminalServer().then();
