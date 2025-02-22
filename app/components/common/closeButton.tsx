@@ -1,10 +1,12 @@
 import { CloseButtonProps } from '~/components/types/componentTypes';
 import React from 'react';
+import { setProjectImportName } from '~/ai/lib/stores/chat';
 
 const CloseButton: React.FC<CloseButtonProps> = ({ closeModal }) => {
   return (
     <div
       onClick={(e) => {
+        setProjectImportName("");
         e.stopPropagation();
         closeModal();
       }}

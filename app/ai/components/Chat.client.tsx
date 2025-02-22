@@ -723,7 +723,7 @@ export const ChatImpl = memo(
         content: [
           {
             type: 'text',
-            text: ` User is connected to Supabase: following the Mandatory Sequence is your core role now when dealing with databases. Use supabase connection credentials provided by user Project URL: ${localStorage.getItem('projectUrl')}, Anon Key: ${localStorage.getItem('annonKey')}`
+            text: ` User is connected to Supabase: following the Mandatory Sequence is your core role now when dealing with databases. Use supabase connection credentials provided by user Project URL: ${localStorage.getItem('projectUrl')}, Anon Key: ${localStorage.getItem('annonKey')}, always use type migration when you run it.`
           }
         ]
       } as any;

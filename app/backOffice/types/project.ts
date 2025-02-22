@@ -50,7 +50,7 @@ export interface ProjectsSectionProps {
   hasMore: boolean;
 }
 
-export interface ProjectUploadProps {
+export interface ProjectImportProps {
   closeModal: () => void;
 }
 

@@ -30,7 +30,6 @@ import { Menu } from './Menu.client';
 import NewBgBiela from '~/assets/icons/new-biela.png';
 import MagicIcon from '../../assets/icons/magicIcon.svg';
 import { createScopedLogger } from '~/utils/logger';
-import CleanUpIcon from '~/assets/icons/refresh.svg';
 import ChatSuggestion from '~/ai/components/ChatSuggestion';
 import CheckList from '~/assets/icons/checkList';
 import { chatStore, setCheckingList, setCleaningProject, setShowPrompt } from '~/ai/lib/stores/chat';
