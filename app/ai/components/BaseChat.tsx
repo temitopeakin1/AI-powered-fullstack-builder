@@ -28,14 +28,15 @@ import { Workbench } from '~/ai/components/workbench/Workbench.client';
 import { ExamplePrompts } from '~/ai/components/ExamplePrompts';
 import { Menu } from './Menu.client';
 import NewBgBiela from '~/assets/icons/new-biela.png';
-import MagicIcon from '../../assets/icons/magicIcon.svg';
+import MagicIcon from '~/assets/icons/magicIcon.svg';
 import { createScopedLogger } from '~/utils/logger';
 import ChatSuggestion from '~/ai/components/ChatSuggestion';
 import CheckList from '~/assets/icons/checkList';
 import { chatStore, setCheckingList, setCleaningProject, setShowPrompt } from '~/ai/lib/stores/chat';
 import { useStore } from '@nanostores/react';
 import { useParams } from '@remix-run/react';
-import {backendApiFetch} from "~/ai/lib/backend-api";
+import { backendApiFetch } from '~/ai/lib/backend-api';
+import CleanUpIcon from '~/assets/icons/refresh.svg';
 
 const TEXTAREA_MIN_HEIGHT = 76;
 
@@ -79,12 +80,9 @@ export const BaseChat = React.forwardRef<HTMLDivElement, BaseChatProps>(
       input = '',
       enhancingPrompt,
       handleInputChange,
-      // promptEnhanced,
       enhancePrompt,
       sendMessage,
       handleStop,
-      importChat,
-      exportChat,
       uploadedFiles = [],
       setUploadedFiles,
       imageDataList = [],
@@ -106,20 +104,23 @@ export const BaseChat = React.forwardRef<HTMLDivElement, BaseChatProps>(
 
     useEffect(() => {
       let active = true;
+
       // Pornim animația de la starea curentă a rotației
       let angle = rotation;
-      const step = 1;
-      const duration = 5000;
-      const interval = duration / 360;
 
       function updateRotation() {
-        if (!active) return;
+        if (!active) {
+          return;
+        }
+
         // Incrementăm unghiul și îl normalizăm la [0, 360)
-        angle = (angle + step) % 360;
+        angle = (angle + 1) % 360;
         setRotation(angle);
 
-        // Dacă streaming-ul este activ, continuăm animația.
-        // Dacă nu, mai continuăm doar până când unghiul revine la 0.
+        /*
+         * Dacă streaming-ul este activ, continuăm animația.
+         * Dacă nu, mai continuăm doar până când unghiul revine la 0.
+         */
         if (isStreaming || angle !== 0) {
           setTimeout(() => {
             requestAnimationFrame(() => {
@@ -127,16 +128,18 @@ export const BaseChat = React.forwardRef<HTMLDivElement, BaseChatProps>(
                 updateRotation();
               }
             });
-          }, interval);
+          }, 5000 / 360);
         } else {
           // Când animația s-a terminat (angle a revenit la 0), oprim animația.
           setRotation(0);
         }
       }
 
-      // Pornim animația dacă:
-      // - streaming-ul e activ, sau
-      // - streaming-ul a devenit false, dar animația nu s-a terminat încă (rotation !== 0)
+      /*
+       * Pornim animația dacă:
+       * - streaming-ul e activ, sau
+       * - streaming-ul a devenit false, dar animația nu s-a terminat încă (rotation !== 0)
+       */
       if (isStreaming || rotation !== 0) {
         updateRotation();
       }
@@ -146,7 +149,6 @@ export const BaseChat = React.forwardRef<HTMLDivElement, BaseChatProps>(
         active = false;
       };
     }, [isStreaming]);
-
 
     useEffect(() => {
       if (chatId) {
@@ -159,19 +161,17 @@ export const BaseChat = React.forwardRef<HTMLDivElement, BaseChatProps>(
         try {
           await backendApiFetch('/ai/abort', {
             method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-            },
+            headers: { 'Content-Type': 'application/json' },
           });
 
           handleStop?.();
-
         } catch (error) {
           logger.error('Error during abort:', error);
           handleStop?.();
         }
       }
     };
+
     /**
      * Keep an eye on transcript changes for debugging
      */
@@ -182,9 +182,7 @@ export const BaseChat = React.forwardRef<HTMLDivElement, BaseChatProps>(
     useEffect(() => {
       localStorage.removeItem('projectUrl');
       localStorage.removeItem('annonKey');
-    }, []);
 
-    useEffect(() => {
       // Setup speech recognition
       if (typeof window !== 'undefined' && ('SpeechRecognition' in window || 'webkitSpeechRecognition' in window)) {
         const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
@@ -423,31 +421,6 @@ export const BaseChat = React.forwardRef<HTMLDivElement, BaseChatProps>(
       }
     };
 
-    // Iterate over the data array and calculate total tokens
-    if (messages != undefined && !isStreaming) {
-      for (let i = 0; i < messages.length; i++) {
-        const item = messages[i];
-
-        // Check if 'annotations' exists and is an array
-        if (item.annotations && Array.isArray(item.annotations)) {
-          // Iterate over annotations and sum totalTokens
-          for (let j = 0; j < item.annotations.length; j++) {
-            const annotation = item.annotations[j];
-
-            /*
-             * Check if 'value' exists and contains 'totalTokens'
-             * @ts-ignore
-             * @ts-ignore
-             */
-            if (annotation?.value && annotation.value.processed === false && annotation.value.totalTokens) {
-              // @ts-ignore
-              annotation.value.processed = true;
-            }
-          }
-        }
-      }
-    }
-
     const handleCleanUp = () => {
       if (isStreaming) {
         return;
@@ -476,8 +449,8 @@ export const BaseChat = React.forwardRef<HTMLDivElement, BaseChatProps>(
 
     const placeholderText =
       mode === 'code'
-        ? "If you can imagine it, BIELA can code it, what shall we do today?"
-        : "How can I help you today? Let’s do something amazing together";
+        ? 'If you can imagine it, BIELA can code it, what shall we do today?'
+        : 'How can I help you today? Let’s do something amazing together';
 
     const baseChat = (
       <div
@@ -540,19 +513,17 @@ export const BaseChat = React.forwardRef<HTMLDivElement, BaseChatProps>(
                   <div
                     style={{ zIndex: '1', '--rotaion-variable': `${rotation}deg` }}
                     className={classNames(
-                      `${(actionAlert?.type === 'preview' || actionAlert?.type === 'migration')  && 'chat-on-error'} backdrop-blur-[15px] transition-all flex flex-col place-items-center align-items-center justify-center rounded-lg relative w-full max-w-chat mx-auto z-prompt base-chat`,
+                      `${(actionAlert?.type === 'preview' || actionAlert?.type === 'migration') && 'chat-on-error'} backdrop-blur-[15px] transition-all flex flex-col place-items-center align-items-center justify-center rounded-lg relative w-full max-w-chat mx-auto z-prompt base-chat`,
                       {
                         'sticky bottom-2': chatStarted,
-                        'chat-mode': mode === 'chat' // Add the chat-mode class when chat is active
-                      }
+                        'chat-mode': mode === 'chat', // Add the chat-mode class when chat is active
+                      },
                     )}
                   >
                     {/*<div className={'loop-border'}></div>*/}
                     {chatStarted && <TokenRemaining isStreaming={isStreaming} />}
                     <div className={classNames(styles.containerUnitTesting, 'w-full')}>
-
-                      {((actionAlert?.type === 'error' && isStreaming) ||
-                        (actionAlert?.type === 'migration')) && (
+                      {((actionAlert?.type === 'error' && isStreaming) || actionAlert?.type === 'migration') && (
                         <ChatAlert
                           alert={actionAlert}
                           clearAlert={() => clearAlert?.()}
@@ -612,11 +583,10 @@ export const BaseChat = React.forwardRef<HTMLDivElement, BaseChatProps>(
                       {/* The prompt textarea + send button */}
                       <div
                         className={classNames(
-                          `relative container-chat-bg transition-all ${!showPrompt ? 'show-prompt' : 'hide-prompt'}`
+                          `relative container-chat-bg transition-all ${!showPrompt ? 'show-prompt' : 'hide-prompt'}`,
                         )}
                       >
-                        <div
-                          className="flex justify-between items-center top-header-prompt text-sm p-3 shadow-xs border-b border-biela-elements-borderColor max-sm:flex-wrap max-sm:gap-2">
+                        <div className="flex justify-between items-center top-header-prompt text-sm p-3 shadow-xs border-b border-biela-elements-borderColor max-sm:flex-wrap max-sm:gap-2">
                           <ChatCodeSwitch />
                           <div className={'flex gap-[6px] items-center'}>
                             <WithTooltip tooltip={checkingList ? 'Checking the features' : 'Checklists'}>
@@ -635,7 +605,7 @@ export const BaseChat = React.forwardRef<HTMLDivElement, BaseChatProps>(
                               <WithTooltip tooltip={`${!showPrompt ? 'Hide Prompt' : 'Show Prompt'}`}>
                                 <button
                                   style={{
-                                    backgroundImage: 'linear-gradient(180deg, #010101 57.32%, #161616 100%)'
+                                    backgroundImage: 'linear-gradient(180deg, #010101 57.32%, #161616 100%)',
                                   }}
                                   className="p-[4px] border rounded-full border-[#2E2E2E] flex items-center"
                                   onClick={() => {
@@ -657,7 +627,7 @@ export const BaseChat = React.forwardRef<HTMLDivElement, BaseChatProps>(
                           className={classNames(
                             'w-full p-[24px] outline-none resize-none text-biela-elements-textPrimary placeholder-biela-elements-textTertiary bg-transparent text-sm chat-textarea-font',
                             'transition-all duration-200',
-                            'hover:border-biela-elements-focus'
+                            'hover:border-biela-elements-focus',
                           )}
                           onDragEnter={(e) => {
                             e.preventDefault();
@@ -744,15 +714,14 @@ export const BaseChat = React.forwardRef<HTMLDivElement, BaseChatProps>(
                           onPaste={handlePaste}
                           style={{
                             minHeight: TEXTAREA_MIN_HEIGHT,
-                            maxHeight: TEXTAREA_MAX_HEIGHT
+                            maxHeight: TEXTAREA_MAX_HEIGHT,
                           }}
                           placeholder={placeholderText}
                           translate="no"
                         />
 
                         {/* Footer row under the textarea */}
-                        <div
-                          className="flex justify-between items-center text-sm p-3 prompt-actions-button shadow-xs border-t border-biela-elements-borderColor h-[56px]">
+                        <div className="flex justify-between items-center text-sm p-3 prompt-actions-button shadow-xs border-t border-biela-elements-borderColor h-[56px]">
                           <div className="flex max-sm:gap-[8px] max-sm:w-full gap-3 items-center">
                             <div className={'flex gap-3 items-center'}>
                               <IconButton
@@ -845,8 +814,7 @@ export const BaseChat = React.forwardRef<HTMLDivElement, BaseChatProps>(
             {!chatStarted && <CopyRighting />}
           </div>
 
-          {/* @ts-ignore */}
-          <ClientOnly>{() => <Workbench chatStarted={chatStarted} />}</ClientOnly>
+          <ClientOnly>{() => <Workbench chatStarted={chatStarted} isStreaming={isStreaming} />}</ClientOnly>
         </div>
       </div>
     );

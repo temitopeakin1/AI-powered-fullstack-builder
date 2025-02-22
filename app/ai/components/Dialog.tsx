@@ -98,7 +98,7 @@ interface DialogProps {
   onClose?: (event: React.UIEvent) => void;
 }
 
-export const Dialog = memo(({ className, children, onBackdrop, onClose }: DialogProps) => {
+export const Dialog = memo(({ className, children, onBackdrop }: DialogProps) => {
   return (
     <RadixDialog.Portal>
       <RadixDialog.Overlay onClick={onBackdrop} asChild>

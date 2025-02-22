@@ -27,6 +27,7 @@ export const Messages = React.forwardRef<HTMLDivElement, MessagesProps>((props: 
   const { id, isStreaming = false, messages = [] } = props;
   const location = useLocation();
   const { checkingList, cleaningProject } = useStore(chatStore);
+
   const handleRewind = (messageId: string) => {
     const searchParams = new URLSearchParams(location.search);
     searchParams.set('rewindTo', messageId);
@@ -56,6 +57,17 @@ export const Messages = React.forwardRef<HTMLDivElement, MessagesProps>((props: 
       setCleaningProject(false);
     }
   }, [isStreaming]);
+
+  // Iterate over the data array and calculate total tokens
+  if (messages.length && !isStreaming) {
+    messages.forEach((item) => {
+      (item.annotations as Array<{ value: { processed: boolean; totalTokens: number } }>)?.forEach((annotation) => {
+        if (!annotation.value?.processed && annotation.value?.totalTokens) {
+          annotation.value.processed = true;
+        }
+      });
+    });
+  }
 
   return (
     <div id={id} ref={ref} className={classNames(props.className, 'flex flex-col', 'overflow-y-auto')}>

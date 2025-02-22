@@ -329,7 +329,7 @@ export class WorkbenchStore {
     }
   }
 
-  getFileModifcations() {
+  getFileModifications() {
     return this.#filesStore.getFileModifications();
   }
 
@@ -749,13 +749,15 @@ export class WorkbenchStore {
 
       const filePaths = Object.keys(newFileMap);
 
+      this.setDocuments(newFileMap);
+
       this.unsavedFiles.set(new Set(filePaths));
 
       await this.saveAllFiles();
 
-      localStorage.setItem('fileTreeData', JSON.stringify(newFileMap));
+      this.resetAllFileModifications();
 
-      // Optionally select the first file, etc.
+      localStorage.setItem('fileTreeData', JSON.stringify(newFileMap));
 
       if (filePaths.length) {
         this.setSelectedFile(filePaths[0]);
@@ -764,6 +766,8 @@ export class WorkbenchStore {
       return newFileMap;
     } catch (error) {
       console.error('Error loading downloaded project:', error);
+
+      return null;
     }
   }
 }

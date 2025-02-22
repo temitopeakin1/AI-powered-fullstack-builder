@@ -1,4 +1,4 @@
-import { FC, UIEvent } from 'react';
+import { FC, type ReactNode, UIEvent } from 'react';
 import { Dialog, DialogButton, DialogDescription, DialogRoot, DialogTitle } from './Dialog';
 import { capitalize } from 'lodash';
 import { LoadingOverlay } from '~/ai/components/LoadingOverlay';
@@ -21,6 +21,8 @@ interface ConfirmationDialogProps {
   onConfirm: (event: UIEvent) => Promise<void> | void;
   onCancel: () => void;
   isLoading?: boolean;
+  content?: ReactNode;
+  containerClassName?: string;
 }
 
 export const emptyConfirmationDialogHandler = Object.fromEntries(
@@ -34,12 +36,14 @@ const ConfirmationDialog: FC<ConfirmationDialogProps> = ({
   onConfirm,
   onCancel,
   isLoading,
+  content,
+  containerClassName,
 }) => {
   const chatTypes = [DialogConfirmationType.FORK, DialogConfirmationType.DELETE, DialogConfirmationType.SAVE];
 
   return (
     <DialogRoot open={isOpen}>
-      <Dialog onBackdrop={onCancel} onClose={onCancel}>
+      <Dialog onBackdrop={onCancel} onClose={onCancel} className={containerClassName}>
         <DialogTitle>
           {capitalize(type)} {chatTypes.includes(type) ? 'Chat' : 'Message'}
         </DialogTitle>
@@ -48,6 +52,7 @@ const ConfirmationDialog: FC<ConfirmationDialogProps> = ({
             <p>
               You are about to {type} <strong>{description}</strong>.
             </p>
+            {content}
             <p className="mt-4"> Are you sure you want to {type} this chat?</p>
           </div>
         </DialogDescription>
