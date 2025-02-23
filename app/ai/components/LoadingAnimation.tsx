@@ -9,19 +9,21 @@ import { useState, useEffect } from 'react';
 
 export default function LoadingAnimation() {
   const messages = [
-    { img: SettingUpProject, text: 'Setting up the project' },
-    { img: CreatingUser, text: 'Creating the user' },
-    { img: UploadinImages, text: 'Uploading the images' },
-    { img: Github, text: 'Connect at the source via GitHub' },
-    { img: AiChat, text: 'Chat with Ai in the side bar' },
-    { img: Deploy, text: 'Deploy when you are ready' },
+    { img: CreatingUser, text: 'Setting up Supabase Authentication...' },
+    { img: SettingUpProject, text: 'Setting up Supabase Project...' },
   ];
 
   const [currentMessage, setCurrentMessage] = useState(0);
 
   useEffect(() => {
     const interval = setInterval(() => {
-      setCurrentMessage((prevIndex) => (prevIndex + 1) % messages.length);
+      setCurrentMessage((prevIndex) => {
+        if (prevIndex === messages.length - 1) {
+          clearInterval(interval);
+          return prevIndex;
+        }
+        return prevIndex + 1;
+      });
     }, 1500);
 
     return () => clearInterval(interval);
@@ -86,7 +88,7 @@ export default function LoadingAnimation() {
       <div className="flex flex-col items-center gap-4 overflow-hidden h-[20px]">
         <div className="flex items-center justify-center gap-2">
           <img src={messages[currentMessage].img} alt="" />
-          <p>{messages[currentMessage].text}</p>
+          <p className="text-white">{messages[currentMessage].text}</p>
         </div>
       </div>
     </div>

@@ -432,21 +432,6 @@ export const ChatImpl = memo(
         setApiKeys(JSON.parse(storedApiKeys));
       }
 
-      const justConnected = localStorage.getItem('justConnectedSupabase');
-
-      if (justConnected === 'true') {
-        localStorage.removeItem('justConnectedSupabase');
-
-        setTimeout(() => {
-          workbenchStore.actionAlert.set({
-            type: 'database',
-            title: 'Database Creation',
-            description: 'Would you like to create a database for your project?',
-            content: 'Content',
-            source: 'preview',
-          });
-        }, 1000);
-      }
     }, []);
 
     useEffect(() => {

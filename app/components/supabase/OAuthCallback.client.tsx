@@ -8,8 +8,6 @@ import ErrorSupabaseDialog from '~/ai/components/ErrorSupabaseDialog';
 
 export const OAuthCallbackClient = () => {
   const navigate = useNavigate();
-  const BASE_URL = import.meta.env.CUSTOM_BACKEND_API;
-  // const [show, setShow] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
   const [isErrorSupabaseDialogOpen, setErrorSupabaseDialogOpen] = useState(false);
@@ -25,6 +23,22 @@ export const OAuthCallbackClient = () => {
       const projectSlug =localStorage.getItem('projectSlug');
 
       if (code) {
+
+        const handleAuthSuccess = (data: unknown) => {
+          const authData = {
+            type: 'SUPABASE_AUTH_COMPLETE',
+            projectUrl: data.projectUrl,
+            annonKey: data.annonKey
+          };
+
+          localStorage.setItem('supabaseAuthData', JSON.stringify(authData));
+
+          if (window.opener) {
+            window.opener.postMessage(authData, window.location.origin);
+          }
+
+          setTimeout(() => window.close(), 1000);
+        };
 
         const response = await backendApiFetch(`/supabase/supabase-auth`, {
           method: 'POST',
@@ -42,16 +56,12 @@ export const OAuthCallbackClient = () => {
 
         if (data.success) {
           setIsSuccess(true);
-          localStorage.setItem('justConnectedSupabase', 'true')
+          handleAuthSuccess(data);
 
-          setTimeout(() => {
-            window.location.href = `chat/${chatId}`;
-          }, 1000);
         }
 
         if(data.message.includes('PROJECT_LIMIT_REACHED')) {
           setIsLoading(false);
-          // setShow(true);
           setErrorSupabaseDialogOpen(true);
         }
       }

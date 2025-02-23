@@ -9,6 +9,7 @@ import type { bielaShell } from '~/utils/shell';
 import { LastInputOnTerminal } from '~/ai/lib/stores/lastInputOnTerminal';
 import {backendApiFetch} from "~/ai/lib/backend-api";
 import {UserStore} from "~/ai/lib/stores/user/userStore";
+import {toast} from "react-toastify";
 
 const logger = createScopedLogger('ActionRunner');
 
@@ -374,6 +375,16 @@ export class ActionRunner {
 
 
       if (migrationResponse.success === false) {
+
+        if (migrationResponse.error === 'SERVICE_UNAVAILABLE') {
+          const toastId = toast.error(migrationResponse.message);
+
+          toast.update(toastId, {
+            duration: Infinity,
+            autoClose: false
+          });
+          throw new Error(migrationResponse.message);
+        }
 
         this.onAlert?.({
           type: 'migration',
