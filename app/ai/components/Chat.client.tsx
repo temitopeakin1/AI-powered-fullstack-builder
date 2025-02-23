@@ -30,6 +30,7 @@ import ignore from 'ignore';
 import { Header } from '~/components/common/Header/Header';
 import { uploadChatMessages } from '~/ai/lib/stores/projects/chat';
 import { backendApiFetch } from '~/ai/lib/backend-api';
+import ErrorTooLongDialog from '~/ai/components/ErrorToLongDialog'; // Import the dialog here
 
 interface FileData {
   type: 'file' | 'folder';
@@ -169,7 +170,6 @@ const logger = createScopedLogger('Chat');
 
 export function Chat() {
   renderLogger.trace('Chat');
-
   const { ready, initialMessages, storeMessageHistory, importChat, exportChat } = useChatHistory();
   const title = useStore(description);
   useEffect(() => {
@@ -266,6 +266,7 @@ interface ChatProps {
 export const ChatImpl = memo(
   ({ description, initialMessages, storeMessageHistory, importChat, exportChat }: ChatProps) => {
     useShortcuts();
+    const [showPromptTooLongDialog, setShowPromptTooLongDialog] = useState(false);
 
     const textareaRef = useRef<HTMLTextAreaElement>(null);
     const [chatStarted, setChatStarted] = useState(initialMessages?.length > 0 || false);
@@ -294,17 +295,25 @@ export const ChatImpl = memo(
         files,
 
         // promptId,
-        mode,
+        mode: chatStore.get().mode,
         contextOptimization: contextOptimizationEnabled,
         projectSlug: workbenchStore.getSlug(),
       },
       sendExtraMessageFields: true,
       onError: (error) => {
         logger.error('Request failed\n\n', error);
-        toast.error(
-          'There was an error processing your request: ' + (error.message ? error.message : 'No details were returned'),
-        );
+        const parsedError = JSON.parse(error.message);
+        console.log(parsedError.message, 'sal'); // 'Prompt too long'
+        if (parsedError.message === 'Prompt too long.') {
+          setShowPromptTooLongDialog(true);
+        } else {
+          toast.error(
+            'There was an error processing your request: ' +
+            (error.message ? error.message : 'No details were returned'),
+          );
+        }
       },
+
       onFinish: (_, response) => {
         const usage = response?.usage;
 
@@ -319,6 +328,17 @@ export const ChatImpl = memo(
       initialMessages,
       initialInput: Cookies.get(PROMPT_COOKIE_KEY) || '',
     });
+
+
+    const handleClose = () => {
+      setShowPromptTooLongDialog(false);
+    };
+
+    const handleEdit = () => {
+      // De exemplu: setInput(''); sau altceva
+      setShowPromptTooLongDialog(false);
+    };
+
 
     const filterMessages = (messages: Message[]) =>
       messages.reduce(
@@ -350,8 +370,8 @@ export const ChatImpl = memo(
                     };
                   }
 
-                  return contentItem;
-                })
+                return contentItem;
+              })
               : [];
 
             acc.push({
@@ -929,6 +949,12 @@ export const ChatImpl = memo(
           setImageDataList={setImageDataList}
           actionAlert={actionAlert}
           clearAlert={() => workbenchStore.clearAlert()}
+        />
+
+        <ErrorTooLongDialog
+          isOpen={showPromptTooLongDialog}
+          onEdit={handleEdit}
+          onClose={handleClose}
         />
       </div>
     );

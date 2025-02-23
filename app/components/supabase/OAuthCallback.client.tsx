@@ -2,16 +2,17 @@ import React, {useEffect, useState} from 'react';
 import { useNavigate } from '@remix-run/react';
 import {Check} from "lucide-react";
 import {backendApiFetch} from "~/ai/lib/backend-api";
-import {workbenchStore} from "~/ai/lib/stores/workbench";
 import LoadingAnimation from '~/ai/components/LoadingAnimation';
+import ErrorSupabaseDialog from '~/ai/components/ErrorSupabaseDialog';
 
 
 export const OAuthCallbackClient = () => {
   const navigate = useNavigate();
   const BASE_URL = import.meta.env.CUSTOM_BACKEND_API;
-  const [show, setShow] = useState(false);
+  // const [show, setShow] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
+  const [isErrorSupabaseDialogOpen, setErrorSupabaseDialogOpen] = useState(false);
 
   const handleAuthCode = async () => {
 
@@ -50,7 +51,8 @@ export const OAuthCallbackClient = () => {
 
         if(data.message.includes('PROJECT_LIMIT_REACHED')) {
           setIsLoading(false);
-          setShow(true);
+          // setShow(true);
+          setErrorSupabaseDialogOpen(true);
         }
       }
       return false;
@@ -93,24 +95,12 @@ export const OAuthCallbackClient = () => {
           </div>
         </div>
       ) : (
-        show && (
-          <div className="p-6 max-w-4xl mx-auto">
-            <h2 className="text-2xl font-bold mb-6 text-white">
-              Limit Reached Please Delete Projects or increase your limit in supabase
-            </h2>
-            <div className="space-y-4 text-2xl font-bold mb-6 text-white">
-              Go to https://supabase.com/dashboard/projects , click on the project, Project Settings, bottom Delete.
-              Then try again to Connect.
-            </div>
-            <button
-              onClick={handleRetry}
-              disabled={isLoading}
-              className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 disabled:opacity-50"
-            >
-              {isLoading ? 'Retrying...' : 'Retry Connection'}
-            </button>
-          </div>
-        )
+        <ErrorSupabaseDialog
+          isOpen={isErrorSupabaseDialogOpen}
+          onEdit={handleRetry}
+          onClose={() => setErrorSupabaseDialogOpen(false)}
+          isLoading={isLoading}
+        />
       )}
     </>
   );
