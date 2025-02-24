@@ -54,9 +54,9 @@ export async function confirmUserEmail(token: string) {
   return data as UserSession;
 }
 
-export async function logoutUser(token: string) {
+export async function logoutUser(token: string, refreshToken: string) {
   try {
-    await fetch(`${BASE_URL}/user/logout`, {
+    await fetch(`${BASE_URL}/user/logout/${refreshToken}`, {
       method: 'GET',
       headers: {
         [getUserHeaderKey()]: token,
