@@ -120,7 +120,7 @@ const ErrorSupabaseDialog: FC<ErrorSupabaseDialogProps> = ({ isOpen, onEdit, onC
             </div>
 
             <div className="px-6 pb-8">
-              <p className="font-inter font-thin text-white text-[12px] text-[#D5D5D5] xl:text-base not-italic leading-normal">
+              <p className="font-inter font-thin text-white text-[16px] text-[#D5D5D5] xl:text-base not-italic leading-normal">
                 Go to <a href="https://supabase.com/dashboard/projects" className="text-[#86F49C] " target="_blank">https://supabase.com/dashboard/projects</a>, click on the project, Project Settings, scroll to the bottom, and click Delete. Then try again to connect.
               </p>
             </div>
