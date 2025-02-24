@@ -136,7 +136,7 @@ export class UserStore {
       refreshTokenExpiresAt = new Date();
 
     user.tokenExpiresAt = add(tokenExpiresAt, {
-      days: expirationSettings.tokenExpirationMinutes, // hot/temp fix session expires
+      minutes: expirationSettings.tokenExpirationMinutes,
     });
     user.refreshTokenExpiresAt = add(refreshTokenExpiresAt, {
       days: expirationSettings.refreshTokenExpirationDays,
@@ -237,12 +237,13 @@ export class UserStore {
    */
   logout = async () => {
     const token = this.getToken();
+    const refreshToken = this.getRefreshToken();
 
     if (!token) {
       return;
     }
 
-    await logoutUser(token as string);
+    await logoutUser(token as string, refreshToken as string);
 
     this.setUser(null);
   };
@@ -290,7 +291,7 @@ export class UserStore {
    * @returns Updated user session with refreshed tokens if needed, or the same session if tokens are still valid
    * @throws Error if both tokens are expired or refresh fails
    */
-  getNewUserDataIfExpired = async () => {
+  getNewUserDataIfExpired = async (forceRefresh = false) => {
     const user = this.getUser();
 
     if (!user) {
@@ -299,7 +300,7 @@ export class UserStore {
 
     const { tokenExpiresAt, refreshTokenExpiresAt } = user;
 
-    if (isAfter(tokenExpiresAt, new Date())) {
+    if (!forceRefresh && isAfter(tokenExpiresAt, new Date())) {
       return;
     }
 

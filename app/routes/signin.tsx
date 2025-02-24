@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
+import { NavLink, useNavigate, useSearchParams } from '@remix-run/react';
 import GreenLogo from '~/assets/icons/logo-green.svg';
 import '../components/styles/signin.scss';
-import { NavLink, useNavigate } from '@remix-run/react';
 import CopyRighting from '~/components/common/copyRight';
 import GoogleLogin from '../assets/icons/google-login.svg';
 import GitHubIcon from '../assets/icons/fi-brands-github.svg';
@@ -9,32 +9,49 @@ import { useUser } from '~/ai/lib/context/userContext';
 import { handleGitHubAuth, handleGoogleAuth } from '~/ai/lib/stores/user/user';
 import { UserLoginContextType } from '~/types/user';
 import InfoIcon from '~/assets/icons/infoIcon.svg';
+import { UserStore } from '~/ai/lib/stores/user/userStore';
 
 function SignIn() {
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const redirectUrl = searchParams.get('redirectUrl'); // e.g. "https://dashboard.mywebsite.com/signin"
+
   const { login, isLoggedIn, setGoogleState } = useUser();
-
-  useEffect(() => {
-    if (!isLoggedIn()) {
-      return;
-    }
-
-    setSuccess(`You're already logged in! Redirecting to home...`);
-
-    setTimeout(() => {
-      // navigate('/');
-      const chatId = localStorage.getItem('chatId');
-      navigate(chatId ? `/chat/${chatId}` : '/');
-    }, 2000);
-  }, [navigate, isLoggedIn]);
+  const userStore = UserStore.getInstance();
+  const { getRefreshToken } = userStore;
 
   const [formData, setFormData] = useState<UserLoginContextType>({
     username: '',
     password: '',
   });
-
   const [error, setError] = useState<string>('');
   const [success, setSuccess] = useState<string>('');
+
+  // Helper to redirect user based on the redirectUrl param or default logic
+  const redirectAfterLogin = () => {
+    if (redirectUrl) {
+      const newUrl = new URL(redirectUrl);
+      const refreshToken = getRefreshToken() as string;
+      newUrl.searchParams.append('refreshToken', refreshToken);
+      window.location.href = newUrl.toString();
+    } else {
+      const chatId = localStorage.getItem('chatId');
+      navigate(chatId ? `/chat/${chatId}` : '/');
+    }
+  };
+
+  // If user is already logged in, redirect accordingly
+  useEffect(() => {
+    if (!isLoggedIn()) {
+      return;
+    }
+
+    setSuccess(
+      redirectUrl ? `You're already logged in! Redirecting...` : `You're already logged in! Redirecting to home...`,
+    );
+
+    redirectAfterLogin();
+  }, [navigate, isLoggedIn, redirectUrl]);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
@@ -48,18 +65,14 @@ function SignIn() {
     e.preventDefault();
     setError('');
     setSuccess('');
+
     try {
       const user = await login(formData);
 
       if (isLoggedIn()) {
-        setSuccess(`You have successfully logged in! Redirecting to home...`);
-
+        setSuccess(`You have successfully logged in! Redirecting...`);
         localStorage.setItem('sessionUser', JSON.stringify(user));
-
-        setTimeout(() => {
-          const chatId = localStorage.getItem('chatId');
-          navigate(chatId ? `/chat/${chatId}` : '/');
-        }, 1000);
+        setTimeout(redirectAfterLogin, 100);
       }
     } catch (err: any) {
       setError(err.message || 'Something went wrong');
@@ -69,9 +82,8 @@ function SignIn() {
   const preHandleGoogleAuth = () => {
     const state = crypto.randomUUID().toString();
     setGoogleState(state);
-
     handleGoogleAuth(state);
-  }
+  };
 
   return (
     <div className="flex items-center flex-col justify-between h-screen signin-bg">
@@ -148,7 +160,8 @@ function SignIn() {
                 type="button"
                 className="w-full text-[18px] flex items-center justify-center font-[400] bg-[#fff] text-[black] google-login"
                 onClick={preHandleGoogleAuth}
-                disabled={isLoggedIn()}>
+                disabled={isLoggedIn()}
+              >
                 <img className="mr-[10px]" src={GoogleLogin} alt={'google-login'} />
                 Login With Google
               </button>
@@ -160,7 +173,7 @@ function SignIn() {
               >
                 <img alt={'github-login'} className="mr-[10px]" src={GitHubIcon} />
                 Login With GitHub
-              </button> 
+              </button>
             </div>
             <NavLink to="/signup" style={{ paddingTop: '9px' }}>
               <span className="create-account">Create An Account</span>

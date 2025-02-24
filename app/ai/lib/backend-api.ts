@@ -7,16 +7,27 @@ export async function backendApiFetch(path: string, options: RequestInit = {}) {
   const userStore = UserStore.getInstance();
   const { getNewUserDataIfExpired, getToken } = userStore;
 
-  // check if token is expired (and refresh if needed).
-  await getNewUserDataIfExpired();
+  const makeRequest = async (forceRefresh = false) => {
+    await getNewUserDataIfExpired(forceRefresh);
 
-  const headers = {
-    ...options.headers,
-    [getUserHeaderKey()]: getToken(),
+    const headers = {
+      ...options.headers,
+      [getUserHeaderKey()]: getToken(),
+    };
+
+    return fetch(`${BASE_URL}${path}`, {
+      ...options,
+      headers,
+    });
   };
 
-  return await fetch(`${BASE_URL}${path}`, {
-    ...options,
-    headers,
-  });
+  // First attempt.
+  let response = await makeRequest();
+
+  // If unauthorized, refresh token and retry.
+  if (response.status === 403) {
+    response = await makeRequest(true);
+  }
+
+  return response;
 }

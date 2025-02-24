@@ -30,7 +30,6 @@ const TokenRemaining = ({ isStreaming }: { isStreaming: boolean }) => {
     const wasInit = remainingTokens !== null && projectTokens !== null && freePromptsRemaining !== null;
 
     if (!isStreaming || !wasInit) {
-      console.log('debugg refreshTokens');
       refreshTokens();
     }
   }, [isStreaming, workbenchStore.getSlug()]);

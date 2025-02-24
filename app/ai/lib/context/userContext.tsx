@@ -22,7 +22,7 @@ export const UserProvider = memo(({ children }: { children: ReactNode }) => {
   const userStore = UserStore.getInstance(setUser);
 
   useMemo(() => {
-    logger.info(`Current user:`, JSON.stringify(user));
+    logger.debug(`Current user:`, JSON.stringify(user));
 
     if (!user) {
       setUser(userStore.getUser());
