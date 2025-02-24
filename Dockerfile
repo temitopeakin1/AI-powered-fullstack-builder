@@ -8,6 +8,15 @@ COPY package.json package-lock.json ./
 
 RUN npm install --legacy-peer-deps
 
+# Check the installed version of 'ai' and fail if incorrect
+RUN apt-get update && apt-get install -y jq \
+ && EXPECTED_AI_VERSION="4.1.6" \
+ && AI_VERSION=$(npm list ai --json | jq -r '.dependencies.ai.version') \
+ && if [ "$AI_VERSION" != "$EXPECTED_AI_VERSION" ]; then \
+      echo "Error: 'ai' package must be version $EXPECTED_AI_VERSION, but found $AI_VERSION"; \
+      exit 1; \
+    fi
+
 # Copy the rest of your app's source code
 COPY . .
 
