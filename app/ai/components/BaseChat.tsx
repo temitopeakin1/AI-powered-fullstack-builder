@@ -523,7 +523,7 @@ export const BaseChat = React.forwardRef<HTMLDivElement, BaseChatProps>(
                     {/*<div className={'loop-border'}></div>*/}
                     {chatStarted && <TokenRemaining isStreaming={isStreaming} />}
                     <div className={classNames(styles.containerUnitTesting, 'w-full')}>
-                      {((actionAlert?.type === 'error' && isStreaming) || (actionAlert?.type === 'preview' && isStreaming) || actionAlert?.type === 'migration') && (
+                      {((actionAlert?.type === 'error' && isStreaming) || actionAlert?.type === 'preview' || actionAlert?.type === 'migration') && (
                         <ChatAlert
                           alert={actionAlert}
                           clearAlert={() => clearAlert?.()}
