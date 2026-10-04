@@ -1,5 +1,4 @@
 const { execSync } = require('child_process');
-const {} = require('ts-debugtools');
 
 // Get git hash with fallback
 const getGitHash = () => {
